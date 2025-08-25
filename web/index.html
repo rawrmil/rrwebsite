@@ -8,6 +8,7 @@
 		<link rel="stylesheet" href="res/fonts/Noto-Sans/import.css">
 	</head>
 	<style>
+		/*body * { border: solid 1px red; }*/
 		body { margin: 0; }
 		body nav {
 			width: 100%;
@@ -27,9 +28,30 @@
 			/* background-color: gray; */
 		}
 		.rr-welcome-pane {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-around;
+			align-items: center;
 			width: 100vw;
 			height: 100vh;
 			background: url("res/images/IMG_5546.JPG") no-repeat center/cover black;
+			padding: 64px 25px 48px 25px;
+			box-sizing: border-box; /* No shrinking */
+		}
+		.rr-welcome-pane * {
+			display: block;
+		}
+		.rr-welcome-pane div {
+			color: white;
+			font-size: 18px;
+			font-family: NotoSans;
+		}
+		.rr-welcome-pane img {
+			width: 300px;
+			height: 300px;
+			object-fit: cover;
+			border-radius: 4px;
+			min-width: 0;
 		}
 		nav .rr-logo {
 			font-size: 30px;
@@ -51,7 +73,13 @@
 			</div>
 			<div class="rr-menu-toggle"><span>MENU</span></div>
 		</nav>
-		<div class="rr-welcome-pane"></div>
+		<div class="rr-welcome-pane">
+			<div>
+				<h3>Software engineer | Frontend Developer | Chill guy</h3>
+				<p>cool cool cool cool cool cool cool cool cool cool cool cool cool cool </p>
+			</div>
+			<img src="res/images/IMG_5562.JPG">
+		</div>
 		<!--<p>some text under</p>-->
 	</body>
 	<script>
