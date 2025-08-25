@@ -40,13 +40,37 @@
 			font-size: 18px;
 			font-family: NotoSans;
 		}
+		.rr-lang-ru { visibility: collapse; }
+		.rr-lang-en { visibility: visible; }
 	</style>
 	<body>
 		<nav>
-			<div class="rr-logo"><span>RAWRMIL</span></div>
+			<div class="rr-logo">
+				<span class='rr-lang-en'>RAWRMIL</span>
+				<span class='rr-lang-ru'>РАВРМИЛЬ</span>
+			</div>
 			<div class="rr-menu-toggle"><span>MENU</span></div>
 		</nav>
 		<div class="rr-welcome-pane"></div>
 		<p>some text under</p>
 	</body>
+	<script>
+		function rrSetupLanguage() {
+			// Defaults
+			const languages = ['en', 'ru'];
+			var currLang = 'en';
+			var defaultLang = navigator.language || navigator.userLanguage || 'en';
+			for (const lang of languages)
+				if (defaultLang.startsWith(lang)) { currLang = lang; break; }
+			// Make current visible, rest invisible
+			var visibility;
+			for (const lang of languages) {
+				visibility = lang === currLang ? 'visible' : 'collapse';
+				document.querySelectorAll(`.rr-lang-${lang}`).forEach(el => {
+					el.style.visibility = visibility;
+				});
+			}
+		}
+		rrSetupLanguage();
+	</script>
 </html>
