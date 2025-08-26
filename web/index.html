@@ -32,26 +32,32 @@
 			flex-wrap: wrap;
 			justify-content: space-around;
 			align-items: center;
+			gap: 10px;
 			width: 100vw;
 			height: 100vh;
 			background: url("res/images/IMG_5546.JPG") no-repeat center/cover black;
-			padding: 64px 25px 48px 25px;
+			padding: 64px 48px 48px 48px;
 			box-sizing: border-box; /* No shrinking */
+			overflow: hidden;
 		}
-		.rr-welcome-pane * {
+		.rr-welcome-pane > * {
 			display: block;
+			flex: 1 0 250px;
 		}
 		.rr-welcome-pane div {
+			flex-grow: 3;
 			color: white;
 			font-size: 18px;
 			font-family: NotoSans;
 		}
 		.rr-welcome-pane img {
-			width: 300px;
-			height: 300px;
+			aspect-ratio: 3/2;
 			object-fit: cover;
-			border-radius: 4px;
+			max-width: 100%;
 			min-width: 0;
+			border-radius: 2px;
+			transform: skew(-3deg);
+			box-shadow: hsl(230, 17%, 7%) 5px 5px 0px;
 		}
 		nav .rr-logo {
 			font-size: 30px;
@@ -76,7 +82,7 @@
 		<div class="rr-welcome-pane">
 			<div>
 				<h3>Software engineer | Frontend Developer | Chill guy</h3>
-				<p>cool cool cool cool cool cool cool cool cool cool cool cool cool cool </p>
+				<p>cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool </p>
 			</div>
 			<img src="res/images/profile1.jpg">
 		</div>
