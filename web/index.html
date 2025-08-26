@@ -69,8 +69,8 @@
 			box-shadow: hsl(230, 17%, 7%) 5px 5px 0px;
 		}
 		/* --- LANGUAGE SYSTEM --- */
-		.rr-lang-ru { visibility: collapse; }
-		.rr-lang-en { visibility: visible; }
+		.rr-lang-ru { display: none; }
+		.rr-lang-en { display: unset; }
 	</style>
 	<body>
 		<nav>
@@ -98,11 +98,10 @@
 			for (const lang of languages)
 				if (defaultLang.startsWith(lang)) { currLang = lang; break; }
 			// Make current visible, rest invisible
-			var visibility;
 			for (const lang of languages) {
-				visibility = lang === currLang ? 'visible' : 'collapse';
+				var display = lang === currLang ? 'unset' : 'none';
 				document.querySelectorAll(`.rr-lang-${lang}`).forEach(el => {
-					el.style.visibility = visibility;
+					el.style.display = display;
 				});
 			}
 		}
