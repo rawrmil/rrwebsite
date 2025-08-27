@@ -29,6 +29,7 @@ char is_working = 1;
 void app_terminate(int sig) { is_working = 0; }
 
 int main(int argc, char* argv[]) {
+	mg_log_set(MG_LL_NONE);
 
 	struct mg_mgr mgr;
 	mg_mgr_init(&mgr);
