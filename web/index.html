@@ -58,6 +58,33 @@
 			font-size: 18px;
 			font-family: NotoSans;
 		}
+		/* --- FOOTER --- */
+		footer {
+			display: flex;
+			justify-content: space-between;
+			font-family: NotoSans;
+			font-size: 24px;
+			padding: 5px 15px 5px 15px;
+			color: white;
+			background-color: black;
+		}
+		.rr-footer-right-wrap {
+			display: flex;
+			font-size: 16px;
+			gap: 8px;
+		}
+		.rr-footer-language a {
+			text-decoration: underline;
+			color: inherit;
+			color: cyan;
+			user-select: none;
+			-webkit-user-select: none;
+		}
+		.rr-footer-language a:hover {
+			text-decoration: none;
+			cursor: pointer;
+		}
+		.rr-footer-copyright { transform: skew(-20deg); color: gray; }
 		/* --- LANGUAGE SYSTEM --- */
 		.rr-lang-ru { display: none; }
 		.rr-lang-en { display: unset; }
@@ -86,7 +113,23 @@
 				</p>
 			</div>
 		</div>
-		<!--<p>some text under</p>-->
+		<footer>
+			<div>
+				<span class="rr-lang-en">coming soon...</span>
+				<span class="rr-lang-ru">скоро...</span>
+			</div>
+			<div class="rr-footer-right-wrap">
+				<div class="rr-footer-language">
+					<a class="rr-lang-en" onclick="rrSetLanguage('ru')">Русский</a>
+					<a class="rr-lang-ru" onclick="rrSetLanguage('en')">English</a>
+				</div>
+				<div>|</div>
+				<div class="rr-footer-copyright">
+					<span class="rr-lang-en">Ramil Khasanshin © 2025</span>
+					<span class="rr-lang-ru">Рамиль Хасаншин © 2025</span>
+				</div>
+			</div>
+		</footer>
 	</body>
 	<script>
 		function rrSetupLanguage() {
