@@ -8,7 +8,7 @@
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		struct mg_http_serve_opts opts = { .root_dir = "./web" };
+		struct mg_http_serve_opts opts = { .root_dir = "./web", .ssi_pattern="#.shtml" };
 		mg_http_serve_dir(c, hm, &opts);
 		return;
 	}
