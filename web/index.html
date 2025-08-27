@@ -37,14 +37,13 @@
 		/* --- WELCOME PANE --- */
 		.rr-welcome-pane {
 			display: flex;
-			flex-wrap: wrap;
-			justify-content: space-around;
+			justify-content: center;
 			align-items: center;
 			gap: 10px;
 			width: 100vw;
-			height: 100vh;
+			min-height: 100vh;
 			background: url("res/images/IMG_5546.JPG") no-repeat center/cover black;
-			padding: 64px 48px 48px 48px;
+			padding: 64px 24px 48px 24px;
 			box-sizing: border-box; /* No shrinking */
 			overflow: hidden;
 		}
@@ -53,19 +52,11 @@
 			flex: 1 0 250px;
 		}
 		.rr-welcome-pane div {
+			max-width: clamp(50%, 600px, 100%);
 			flex-grow: 3;
 			color: white;
 			font-size: 18px;
 			font-family: NotoSans;
-		}
-		.rr-welcome-pane img {
-			aspect-ratio: 3/2;
-			object-fit: cover;
-			max-width: 100%;
-			min-width: 0;
-			border-radius: 2px;
-			transform: skew(-3deg);
-			box-shadow: hsl(230, 17%, 7%) 5px 5px 0px;
 		}
 		/* --- LANGUAGE SYSTEM --- */
 		.rr-lang-ru { display: none; }
@@ -81,10 +72,19 @@
 		</nav>
 		<div class="rr-welcome-pane">
 			<div>
-				<h3>Software engineer | Frontend Developer | Chill guy</h3>
-				<p>cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool cool </p>
+				<h1>
+					<span class="rr-lang-en">developer</span>
+					<span class="rr-lang-ru">разработчик</span>
+				</h1>
+				<h2>
+					<span class="rr-lang-en">and more</span>
+					<span class="rr-lang-ru">и не только</span>
+				</h2>
+				<p>
+					<span class="rr-lang-en">hello girls. are you ready to be blow away?</span>
+					<span class="rr-lang-ru">привет девчёнки. готовы к разносу?</span>
+				</p>
 			</div>
-			<img src="res/images/profile1.jpg">
 		</div>
 		<!--<p>some text under</p>-->
 	</body>
