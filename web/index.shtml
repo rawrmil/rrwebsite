@@ -1,0 +1,18 @@
+<!--#include file="templates/default-before.html" -->
+<div class="rr-welcome-pane">
+	<div>
+		<h1>
+			<span class="rr-lang-en">developer</span>
+			<span class="rr-lang-ru">разработчик</span>
+		</h1>
+		<h2>
+			<span class="rr-lang-en">and more</span>
+			<span class="rr-lang-ru">и не только</span>
+		</h2>
+		<p>
+			<span class="rr-lang-en">hello girls. are you ready to be blow away?</span>
+			<span class="rr-lang-ru">привет девчёнки. готовы к разносу?</span>
+		</p>
+	</div>
+</div>
+<!--#include file="templates/default-after.html" -->
