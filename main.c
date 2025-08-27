@@ -30,12 +30,12 @@ void app_terminate(int sig) { is_working = 0; }
 
 int main(int argc, char* argv[]) {
 
-	signal(SIGINT, app_terminate);
-	signal(SIGTERM, app_terminate);
-
 	struct mg_mgr mgr;
 	mg_mgr_init(&mgr);
 	mg_http_listen(&mgr, "http://0.0.0.0:6969", ev_handler, NULL);
+
+	signal(SIGINT, app_terminate);
+	signal(SIGTERM, app_terminate);
 
 	while (is_working) {
 		mg_mgr_poll(&mgr, 1000);
