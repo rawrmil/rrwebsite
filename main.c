@@ -6,27 +6,33 @@
 
 // --- APP ---
 
+char web_dir_default[] = "./web";
+
 struct a_config {
 	int port;
-};
+	char* web_dir;
+} aconf;
 
 struct a_config a_read_args(int argc, char* argv[]) {
 	struct a_config aconf = {0};
 	aconf.port = 6969;
+	aconf.web_dir = web_dir_default;
 
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"port", required_argument, 0, 'p'},
+		{"webdir", required_argument, 0, 'd'},
 		{0, 0, 0, 0} // NULL-terminator
 	};
 
 	int opt;
 	errno = 0;
-	while ((opt = getopt_long(argc, argv, "hp:", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hp:d:", long_options, NULL)) != -1) {
 		switch (opt) {
 			case 'h':
 				printf("Help:\n");
 				printf("--port, -p - specify running port for the server\n");
+				printf("--webdir, -d - specify director for the server to serve\n");
 				exit(0);
 				break;
 			case 'p':
@@ -36,6 +42,10 @@ struct a_config a_read_args(int argc, char* argv[]) {
 					printf("--port argument is invalid (0-65535)\n");
 					exit(1);
 				}
+				break;
+			case 'd':
+				printf("! %s\n", optarg);
+				aconf.web_dir = optarg;
 				break;
 			default:
 				break;
@@ -50,7 +60,7 @@ struct a_config a_read_args(int argc, char* argv[]) {
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		struct mg_http_serve_opts opts = { .root_dir = "./web", .ssi_pattern="#.shtml" };
+		struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir, .ssi_pattern="#.shtml" };
 		mg_http_serve_dir(c, hm, &opts);
 		return;
 	}
@@ -73,7 +83,8 @@ void app_terminate(int sig) { is_working = 0; }
 int main(int argc, char* argv[]) {
 	mg_log_set(MG_LL_NONE);
 
-	struct a_config aconf = a_read_args(argc, argv);
+	aconf = a_read_args(argc, argv);
+	printf("! %s\n", aconf.web_dir);
 
 	struct mg_mgr mgr;
 	mg_mgr_init(&mgr);
