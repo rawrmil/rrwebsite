@@ -1,7 +1,49 @@
 #include <stdio.h>
 #include <signal.h>
+#include <getopt.h>
 
 #include "mongoose/mongoose.h"
+
+// --- APP ---
+
+struct a_config {
+	int port;
+};
+
+struct a_config a_read_args(int argc, char* argv[]) {
+	struct a_config aconf = {0};
+	aconf.port = 6969;
+
+	static struct option long_options[] = {
+		{"help", no_argument, 0, 'h'},
+		{"port", required_argument, 0, 'p'},
+		{0, 0, 0, 0} // NULL-terminator
+	};
+
+	int opt;
+	errno = 0;
+	while ((opt = getopt_long(argc, argv, "hp:", long_options, NULL)) != -1) {
+		switch (opt) {
+			case 'h':
+				printf("Help:\n");
+				printf("--port, -p - specify running port for the server\n");
+				exit(0);
+				break;
+			case 'p':
+				char* endp;
+				aconf.port = strtol(optarg, &endp, 10);
+				if (errno || *endp != '\0') {
+					printf("--port argument is invalid (0-65535)\n");
+					exit(1);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	return aconf;
+}
 
 // --- EVENTS ---
 
@@ -31,9 +73,13 @@ void app_terminate(int sig) { is_working = 0; }
 int main(int argc, char* argv[]) {
 	mg_log_set(MG_LL_NONE);
 
+	struct a_config aconf = a_read_args(argc, argv);
+
 	struct mg_mgr mgr;
 	mg_mgr_init(&mgr);
-	mg_http_listen(&mgr, "http://0.0.0.0:6969", ev_handler, NULL);
+	char addrstr[32];
+	snprintf(addrstr, sizeof(addrstr), "http://0.0.0.0:%d", aconf.port);
+	mg_http_listen(&mgr, addrstr, ev_handler, NULL);
 
 	signal(SIGINT, app_terminate);
 	signal(SIGTERM, app_terminate);
