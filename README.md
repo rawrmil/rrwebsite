@@ -4,8 +4,8 @@ My cool website
 ## Deploy
 ```sh
 make
-# TODO: nginx proxy settings
 ./rrwebsite --port 6969 --webdir web
+# Check nginx_proxy_example.conf
 ```
 
 ## Commits
