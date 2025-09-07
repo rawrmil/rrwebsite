@@ -1,3 +1,5 @@
 rrwebsite
+ssr_convert
 *.o
 web/res/
+ssr_generated/

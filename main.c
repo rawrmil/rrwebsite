@@ -5,6 +5,16 @@
 #include "mongoose/mongoose.h"
 #include "sds/sds.h"
 
+#define RRSTD_IMPLEMENTATION
+#include "rrstd.h"
+#include "ssr.h"
+
+R_StringBuilder ssr_index_html() {
+	R_StringBuilder ssr_sb = {0};
+	#include "ssr_generated/index_html.h"
+	return ssr_sb;
+}
+
 // --- APP ---
 
 char web_dir_default[] = "./web";
@@ -61,9 +71,13 @@ struct a_config a_read_args(int argc, char* argv[]) {
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir, .ssi_pattern="#.shtml" };
-		mg_http_serve_dir(c, hm, &opts);
+		R_StringBuilder sb = ssr_index_html();
+		mg_http_reply(c, 200, "", sb.buf);
+		R_SB_FREE(&sb);
 		return;
+		//struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir, .ssi_pattern="#.shtml" };
+		//mg_http_serve_dir(c, hm, &opts);
+		//return;
 	}
 }
 
