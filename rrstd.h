@@ -27,7 +27,7 @@
 #define R_DECLTYPE_CAST(T)
 #endif // __cplusplus
 
-#define R_DA_DEFINE(DA_TYPE_, ITEM_TYPE_) \
+#define R_DA_DEFINE(ITEM_TYPE_, DA_TYPE_) \
 	typedef struct { \
 		ITEM_TYPE_* buf; \
 		size_t len; \
