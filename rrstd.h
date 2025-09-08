@@ -27,6 +27,8 @@
 #define R_DECLTYPE_CAST(T)
 #endif // __cplusplus
 
+// --- Dynamic Arrays ---
+
 #define R_DA_DEFINE(ITEM_TYPE_, DA_TYPE_) \
 	typedef struct { \
 		ITEM_TYPE_* buf; \
@@ -76,7 +78,47 @@
 #define R_DA_FOREACH(TYPE_, IT_, DA_) \
 	for (TYPE_ *IT_ = (DA_)->buf; IT_ < (DA_)->buf + (DA_)->len; ++IT_)
 
+// --- String Builder ---
+
+R_DA_DEFINE(char, R_StringBuilder);
+
+#define R_SB_APPEND_CSTR(SB_, BUF_) R_DA_APPEND_MANY((SB_), BUF_, sizeof(BUF_)-1)
+#define R_SB_APPEND_BUFFER(SB_, BUF_, LEN_) R_DA_APPEND_MANY((SB_), BUF_, LEN_)
+int R_SB_AppendFormat(R_StringBuilder *sb, const char *fmt, ...);
+
+#define R_SB_FREE(SB_) R_DA_FREE((SB_))
+
+// --- Implementation ---
+
+#ifdef RRSTD_IMPLEMENTATION
+
+// TODO: NOBDEF from nob.h
+
+int R_SB_AppendFormat(R_StringBuilder *sb, const char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	int n = vsnprintf(NULL, 0, fmt, args);
+	va_end(args);
+
+	R_DA_RESERVE(sb, sb->len + n + 1); // With NULL-terminator
+
+	char* dst = sb->buf + sb->len;
+
+	va_start(args, fmt);
+	vsnprintf(dst, n+1, fmt, args);
+	va_end(args);
+
+	sb->len += n; // Without NULL-terminator
+
+	return n;
+}
+
+#endif
+
 /* TODO: add testing
+
+DA_DEFINE(int, daint_t)
+
 	daint_t da = {0};
 	R_DA_APPEND(&da, 1);
 	R_DA_APPEND(&da, 2);
@@ -101,6 +143,16 @@
 	printf("%d\n", R_DA_LAST(&da));
 
 	R_DA_FREE(&da);
+
+	////
+
+	R_StringBuilder sb = {0};
+	R_SB_APPEND_CSTR(&sb, "number:");
+	int n = R_SB_AppendFormat(&sb, "%d", 123);
+	printf("string: '%s', appended: %d\n", sb.buf, n);
+	R_SB_AppendFormat(&sb, ", hex: %x", 123);
+	printf("string: '%s'\n", sb.buf, n);
+	R_SB_FREE(&sb);
 */
 
 #endif /* RRSTD_H */
