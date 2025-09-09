@@ -82,7 +82,7 @@
 
 R_DA_DEFINE(char, R_StringBuilder);
 
-#define R_SB_APPEND_CSTR(SB_, BUF_) R_DA_APPEND_MANY((SB_), BUF_, sizeof(BUF_)-1)
+#define R_SB_APPEND_CSTR(SB_, BUF_) R_DA_APPEND_MANY((SB_), BUF_, strlen(BUF_))
 #define R_SB_APPEND_BUFFER(SB_, BUF_, LEN_) R_DA_APPEND_MANY((SB_), BUF_, LEN_)
 int R_SB_AppendFormat(R_StringBuilder *sb, const char *fmt, ...);
 
