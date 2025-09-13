@@ -11,7 +11,7 @@
 
 R_StringBuilder ssr_index_html() {
 	R_StringBuilder ssr_sb = {0};
-	#include "generated/index_html.h"
+	#include "ssr_generated/index_html.h"
 	return ssr_sb;
 }
 

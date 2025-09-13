@@ -12,9 +12,9 @@ main: ssr_convert
 	gcc main.c -o $(BIN) $(LIB) $(INC)
 
 ssr_convert:
-	mkdir -p generated
-	gcc ssr_convert.c -o ssr_convert
-	./ssr_convert web/index.ssrt.html generated/index_html.h
+	mkdir -p ssr_generated
+	gcc ssr_generate.c -o ssr_generate
+	./ssr_generate web/index.ssrt.html ssr_generated/index_html.h
 
 run: main
 	./$(BIN)
