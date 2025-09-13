@@ -29,8 +29,36 @@ failure:
 	goto cleanup;
 }
 
+typedef struct SSREntry {
+	R_StringBuilder fpath;
+	R_StringBuilder fname;
+	R_StringBuilder hname;
+} SSREntry;
+
+R_DA_DEFINE(SSREntry, SSREntries);
+
+SSREntries ssr_entries = {0};
+
 char AddSSRFile(char* fpath) {
-	printf("fpath: %s\n", fpath);
+	char tail[] = ".ssrt.html";
+	size_t tail_len = strlen(tail);
+	size_t fpath_len = strlen(fpath);
+	if (fpath_len < tail_len)
+		return 0;
+	if (strcmp(tail, fpath + fpath_len - tail_len) != 0)
+		return 0;
+	SSREntry ssr_entry = {0};
+	char* ptr = fpath+fpath_len-1;
+	for (; ptr != fpath; ptr--) {
+		if (*ptr == '/') { ptr++; break; }
+	}
+	R_SB_APPEND_CSTR(&ssr_entry.fname, ptr);
+	R_SB_APPEND_BUFFER(&ssr_entry.fname, "\0", 1);
+	R_SB_APPEND_CSTR(&ssr_entry.fpath, fpath);
+	R_SB_APPEND_BUFFER(&ssr_entry.fpath, "\0", 1);
+	printf("fpath: %s\n", ssr_entry.fpath.buf);
+	printf("fname: %s\n", ssr_entry.fname.buf);
+	R_DA_APPEND(&ssr_entries, ssr_entry);
 	return 1;
 }
 
