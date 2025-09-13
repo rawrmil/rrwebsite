@@ -29,43 +29,41 @@ failure:
 	goto cleanup;
 }
 
-int ProcessContents(R_StringBuilder sb_in, R_StringBuilder* sb_out_ptr) {
+int ProcessContents(R_StringBuilder sb_in, R_StringBuilder* sb_out) {
 	char cb[] = "<!--%c";
 	char ce[] = "%-->";
 	char sb[] = "SSR_OUT(\"";
 	char se[] = "\");\n";
-	R_StringBuilder sb_out = {0};
 	char mode = 0;
 	size_t line = 0;
-	R_SB_AppendFormat(&sb_out, sb);
+	R_SB_AppendFormat(sb_out, sb);
 	for (char* inp = sb_in.buf; *inp; inp++) {
 		if (*inp == '\n') line++;
 		if (strncmp(inp, ce, strlen(ce)) == 0) {
 			inp = inp+strlen(ce);
 			assert(mode != 0);
-			R_SB_AppendFormat(&sb_out, sb);
+			R_SB_AppendFormat(sb_out, sb);
 			mode = 0;
 		}
 		if (strncmp(inp, cb, strlen(cb)) == 0) {
 			inp = inp+strlen(cb);
 			assert(mode != 1);
-			R_SB_AppendFormat(&sb_out, se);
+			R_SB_AppendFormat(sb_out, se);
 			mode = 1;
 		}
 		if (mode == 0) {
-			R_SB_AppendFormat(&sb_out, "\\x%x", *inp);
+			R_SB_AppendFormat(sb_out, "\\x%x", *inp);
 			continue;
 		}
-		R_DA_APPEND(&sb_out, *inp);
+		R_DA_APPEND(sb_out, *inp);
 	}
-	R_SB_AppendFormat(&sb_out, se);
-	*sb_out_ptr = sb_out;
+	R_SB_AppendFormat(sb_out, se);
 	return 0;
 }
 
 int main(int argc, char* argv[]) {
-	if (argc < 3) {
-		printf("cssr_convert <in_path> <out_path>\n");
+	if (argc != 4) {
+		printf("cssr_convert <in_path> <out_path> <function_name>\n");
 		printf("Example: cssr_convert something.cssr.html something_html.c\n");
 		return 0;
 	}
@@ -76,7 +74,11 @@ int main(int argc, char* argv[]) {
 
 	// Process
 	R_StringBuilder sb_out = {0};
+	R_SB_AppendFormat(&sb_out, "R_StringBuilder %s() {\n", argv[3]);
+	R_SB_AppendFormat(&sb_out, "\tR_StringBuilder ssr_sb = {0};\n");
 	assert(!ProcessContents(sb_in, &sb_out));
+	R_SB_AppendFormat(&sb_out, "\treturn ssr_sb;\n");
+	R_SB_AppendFormat(&sb_out, "}\n");
 
 	// File out
 	FILE *out_fp = fopen(argv[2], "w");

@@ -14,7 +14,7 @@ main: ssr_convert
 ssr_convert:
 	mkdir -p ssr_generated
 	gcc ssr_convert.c -o ssr_convert
-	./ssr_convert web/index.ssrt.html ssr_generated/index_html.h
+	./ssr_convert web/index.ssrt.html ssr_generated/ssr_root.h ssr_root
 
 run: main
 	./$(BIN)
