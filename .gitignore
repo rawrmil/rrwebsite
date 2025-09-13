@@ -1,5 +1,5 @@
 rrwebsite
-ssr_generate
 *.o
 web/res/
-generated/
+ssr_generate
+ssr_generated/
