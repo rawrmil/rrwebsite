@@ -1,3 +1,7 @@
 #!/bin/sh
 
-find . | grep -e '*.c' -e 'Makefile' | entr -r make run
+find . -type f \
+	-name "*.c" -o \
+	-name "Makefile" -o \
+	-name "*.ssrt.*" \
+	| entr -r make run
