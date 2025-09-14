@@ -8,7 +8,7 @@
 		<link rel="stylesheet" href="res/fonts/Noto-Sans/import.css">
 	</head>
 	<style>
-		/*body * { border: solid 1px red; }*/
+		body * { border: solid 1px red; }
 		body { margin: 0; }
 		/* --- NAVBAR --- */
 		body nav {
@@ -29,10 +29,34 @@
 			font-size: 30px;
 			transform: skew(-35deg);
 			font-family: LibertinusSerif;
+			z-index: 1000;
 		}
-		nav .rr-menu-toggle {
+		.rr-menu-toggle {
 			font-size: 18px;
 			font-family: NotoSans;
+			z-index: 1000;
+		}
+		.rr-menu-toggle label {
+			cursor: pointer;
+			-webkit-user-select: none;
+		}
+		nav input { display: none; }
+		.rr-menu-overlay {
+			opacity: 0;
+			margin: 0;
+			position: fixed;
+			inset: 0 0 0 0;
+			display: flex;
+			color: #fff;
+			justify-content: center;
+			align-items: center;
+			pointer-events: none;
+			transition: .3s;
+			background: rgba(0,0,0,0.8);
+		}
+		#rr-menu-toggle:checked ~ .rr-menu-overlay {
+			opacity: 1;
+			pointer-events:auto;
 		}
 		/* --- FOOTER --- */
 		footer {
@@ -71,5 +95,11 @@
 				<span class='rr-lang-en'>RAWRMIL</span>
 				<span class='rr-lang-ru'>RAWRMIL</span>
 			</div>
-			<div class="rr-menu-toggle"><span>MENU</span></div>
+			<div class="rr-menu-toggle">
+				<label for="rr-menu-toggle">MENU</label>
+			</div>
+			<input type="checkbox" id="rr-menu-toggle">
+			<div class="rr-menu-overlay">
+				<h1>Menu Content</h1>
+			</div>
 		</nav>
