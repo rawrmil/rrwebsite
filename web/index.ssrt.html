@@ -1,8 +1,44 @@
-<h1>Hello</h1>
-<h2>
-<!--%c
-	for (int i = 0; i < 10; i++) {
-		R_SB_AppendFormat(&ssr_sb, "%d ", i);
+<!--%c	ssr_template_default_before(ssr_sb); %-->
+<style>
+	/* --- WELCOME PANE --- */
+	.rr-welcome-pane {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 10px;
+		width: 100vw;
+		min-height: 100vh;
+		background: url("res/images/background1.jpg") no-repeat center/cover black;
+		padding: 64px 24px 48px 24px;
+		box-sizing: border-box; /* No shrinking */
+		overflow: hidden;
 	}
-%-->
-</h2>
+	.rr-welcome-pane > * {
+		display: block;
+		flex: 1 0 250px;
+	}
+	.rr-welcome-pane div {
+		max-width: clamp(50%, 600px, 100%);
+		flex-grow: 3;
+		color: white;
+		font-size: 18px;
+		font-family: NotoSans;
+	}
+</style>
+<div class="rr-welcome-pane">
+	<div>
+		<h1>
+			<span class="rr-lang-en">developer</span>
+			<span class="rr-lang-ru">разработчик</span>
+		</h1>
+		<h2>
+			<span class="rr-lang-en">and more</span>
+			<span class="rr-lang-ru">и не только</span>
+		</h2>
+		<p>
+			<span class="rr-lang-en">hello guys, this is my cool website. there's not much here yet but yeah just wait</span>
+			<span class="rr-lang-ru">всем привет, это мой крутой вебсайт. здесь пока ничего толком нет, но просто подождите</span>
+		</p>
+	</div>
+</div>
+<!--%c	ssr_template_default_after(ssr_sb); %-->

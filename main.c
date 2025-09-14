@@ -9,6 +9,8 @@
 #include "rrstd.h"
 #include "ssr.h"
 
+#include "ssr_generated/template_default_before.h"
+#include "ssr_generated/template_default_after.h"
 #include "ssr_generated/ssr_root.h"
 
 // --- APP ---
@@ -67,7 +69,11 @@ struct a_config a_read_args(int argc, char* argv[]) {
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		R_StringBuilder sb = ssr_root();
+		//mg_http_reply(c, 200, "", "123");
+		R_StringBuilder sb = {0};
+		R_DA_RESERVE(&sb, 8192);
+		//R_SB_APPEND_CSTR(&sb, "123");
+		ssr_root(&sb);
 		mg_http_reply(c, 200, "", sb.buf);
 		R_SB_FREE(&sb);
 		return;

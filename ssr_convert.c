@@ -52,7 +52,7 @@ int ProcessContents(R_StringBuilder sb_in, R_StringBuilder* sb_out) {
 			mode = 1;
 		}
 		if (mode == 0) {
-			R_SB_AppendFormat(sb_out, "\\x%x", *inp);
+			R_SB_AppendFormat(sb_out, "\\x%02x", (unsigned char)(*inp));
 			continue;
 		}
 		R_DA_APPEND(sb_out, *inp);
@@ -74,10 +74,8 @@ int main(int argc, char* argv[]) {
 
 	// Process
 	R_StringBuilder sb_out = {0};
-	R_SB_AppendFormat(&sb_out, "R_StringBuilder %s() {\n", argv[3]);
-	R_SB_AppendFormat(&sb_out, "\tR_StringBuilder ssr_sb = {0};\n");
+	R_SB_AppendFormat(&sb_out, "void %s(R_StringBuilder* ssr_sb) {\n", argv[3]);
 	assert(!ProcessContents(sb_in, &sb_out));
-	R_SB_AppendFormat(&sb_out, "\treturn ssr_sb;\n");
 	R_SB_AppendFormat(&sb_out, "}\n");
 
 	// File out
