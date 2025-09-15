@@ -3,7 +3,6 @@
 #include <getopt.h>
 
 #include "mongoose/mongoose.h"
-#include "sds/sds.h"
 
 // --- SSR ---
 
