@@ -3,6 +3,5 @@
 find . -type f \
 	-name "*.c" -o \
 	-name "Makefile" -o \
-	-name "*.html" -o \
-	-name "*.ssrt.*" \
+	-name "*.html" \
 	| entr -r make run
