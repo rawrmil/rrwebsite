@@ -1,4 +1,5 @@
-<!--%c	ssr_template_default_before(ssr_sb); %-->
+<!--%c SSR_DEREF_DATA(); %-->
+<!--%c ssr_template_default_before(ssr_sb, ssr_user); %-->
 <style>
 	/* --- WELCOME PANE --- */
 	.rr-welcome-pane {
@@ -41,4 +42,8 @@
 		</p>
 	</div>
 </div>
-<!--%c	ssr_template_default_after(ssr_sb); %-->
+<!--%c ssr_template_default_after(ssr_sb, ssr_user); %-->
+<!--%c
+	SSR_RU_PRINTF("RUSSIAN");
+	SSR_EN_PRINTF("ENGLISH");
+%-->
