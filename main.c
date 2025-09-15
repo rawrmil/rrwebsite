@@ -98,18 +98,23 @@ SSRFuncPtr serve_page(struct mg_connection* c, struct mg_http_message* hm) {
 	return NULL;
 }
 
+char http_is_lang_ru(struct mg_http_message* hm) {
+	struct mg_str var_lang = mg_http_var(hm->query, mg_str("lang"));
+	if (var_lang.len >= 2)
+		return strncmp("ru", var_lang.buf, 2) == 0;
+	struct mg_str* header_lang = mg_http_get_header(hm, "Accept-Language");
+	if (header_lang && header_lang->len >= 2)
+		return strncmp("ru", header_lang->buf, 2) == 0;
+	return 0;
+}
+
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
 		SSRFuncPtr ssr_func_ptr = serve_page(c, hm);
-		printf("%.*s\n", hm->uri.len, hm->uri.buf);
-		printf("%p\n", ssr_func_ptr);
 		if (ssr_func_ptr) {
 			SSRData ssr_data = {0};
-			struct mg_str *s = mg_http_get_header(hm, "Accept-Language");
-			if (s && s->len >= 2) {
-				ssr_data.lang_is_ru = strncmp("ru", s->buf, 2) == 0;
-			}
+			ssr_data.lang_is_ru = http_is_lang_ru(hm);
 			//mg_http_reply(c, 200, "", "123");
 			R_StringBuilder sb = {0};
 			R_DA_RESERVE(&sb, 8192);
