@@ -22,8 +22,8 @@ struct ssr_data {
 #define SSR_DEREF_DATA(d) \
 	struct ssr_data ssr_data = (struct ssr_data*)ssr_user ? *((struct ssr_data*)ssr_user) : (struct ssr_data){0};
 
-#include "ssr_generated/template_default_before.h"
-#include "ssr_generated/template_default_after.h"
+#include "ssr_generated/ssr_template_default_before.h"
+#include "ssr_generated/ssr_template_default_after.h"
 #include "ssr_generated/ssr_root.h"
 
 // --- APP ---
