@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
 
 	// Process
 	R_StringBuilder sb_out = {0};
-	R_SB_AppendFormat(&sb_out, "void %s(R_StringBuilder* ssr_sb, void* ssr_user) {\n", argv[3]);
+	R_SB_AppendFormat(&sb_out, "void %s(R_StringBuilder* ssr_sb, SSRData ssr_data) {\n", argv[3]);
 	assert(!ProcessContents(sb_in, &sb_out));
 	R_SB_AppendFormat(&sb_out, "}\n");
 

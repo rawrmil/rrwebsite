@@ -1,5 +1,4 @@
-<!--%c SSR_DEREF_DATA(); %-->
-<!--%c ssr_template_default_before(ssr_sb, ssr_user); %-->
+<!--%c ssr_template_default_before(ssr_sb, ssr_data); %-->
 <style>
 	/* --- WELCOME PANE --- */
 	.rr-welcome-pane {
@@ -29,21 +28,23 @@
 <div class="rr-welcome-pane">
 	<div>
 		<h1>
-			<span class="rr-lang-en">developer</span>
-			<span class="rr-lang-ru">разработчик</span>
+			<!--%c
+				SSR_RU_PRINTF("разработчик");
+				SSR_EN_PRINTF("developer");
+			%-->
 		</h1>
 		<h2>
-			<span class="rr-lang-en">and more</span>
-			<span class="rr-lang-ru">и не только</span>
+			<!--%c
+				SSR_RU_PRINTF("и не только");
+				SSR_EN_PRINTF("and more");
+			%-->
 		</h2>
 		<p>
-			<span class="rr-lang-en">hello guys, this is my cool website. there's not much here yet but yeah just wait</span>
-			<span class="rr-lang-ru">всем привет, это мой крутой вебсайт. здесь пока ничего толком нет, но просто подождите</span>
+			<!--%c
+				SSR_RU_PRINTF("всем привет, это мой крутой вебсайт. здесь пока ничего толком нет, но просто подождите");
+				SSR_EN_PRINTF("hello guys, this is my cool website. there's not much here yet but yeah just wait");
+			%-->
 		</p>
 	</div>
 </div>
-<!--%c ssr_template_default_after(ssr_sb, ssr_user); %-->
-<!--%c
-	SSR_RU_PRINTF("RUSSIAN");
-	SSR_EN_PRINTF("ENGLISH");
-%-->
+<!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->

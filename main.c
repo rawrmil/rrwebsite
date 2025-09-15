@@ -6,9 +6,9 @@
 
 // --- SSR ---
 
-struct ssr_data {
+typedef struct SSRData {
 	char lang_is_ru;
-};
+} SSRData;
 
 #define RRSTD_IMPLEMENTATION
 #include "rrstd.h"
@@ -81,7 +81,7 @@ struct a_config a_read_args(int argc, char* argv[]) {
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		struct ssr_data ssr_data = {0};
+		SSRData ssr_data = {0};
 		struct mg_str *s = mg_http_get_header(hm, "Accept-Language");
 		if (s && s->len >= 2) {
 			ssr_data.lang_is_ru = strncmp("ru", s->buf, 2) == 0;
@@ -90,7 +90,7 @@ void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 		R_StringBuilder sb = {0};
 		R_DA_RESERVE(&sb, 8192);
 		//R_SB_APPEND_CSTR(&sb, "123");
-		ssr_root(&sb, &ssr_data);
+		ssr_root(&sb, ssr_data);
 		mg_http_reply(c, 200, "", sb.buf);
 		R_SB_FREE(&sb);
 		return;
