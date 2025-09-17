@@ -45,6 +45,12 @@
 				SSR_EN_PRINTF("hello guys, this is my cool website. there's not much here yet but yeah just wait");
 			%-->
 		</p>
+		<p>
+			<!--%c
+				SSR_RU_PRINTF("активные подключения: %zu", ssr_data.active_conns);
+				SSR_EN_PRINTF("active connections: %zu", ssr_data.active_conns);
+			%-->
+		</p>
 	</div>
 </div>
 <!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->

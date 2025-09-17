@@ -8,6 +8,7 @@
 
 typedef struct SSRData {
 	char lang_is_ru;
+	size_t active_conns;
 } SSRData;
 
 #define RRSTD_IMPLEMENTATION
@@ -108,6 +109,8 @@ char http_is_lang_ru(struct mg_http_message* hm) {
 	return 0;
 }
 
+size_t active_conns = 0;
+
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	if (!strncmp(hm->method.buf, "GET", 3)) {
@@ -115,6 +118,7 @@ void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 		if (ssr_func_ptr) {
 			SSRData ssr_data = {0};
 			ssr_data.lang_is_ru = http_is_lang_ru(hm);
+			ssr_data.active_conns = active_conns/2;
 			//mg_http_reply(c, 200, "", "123");
 			R_StringBuilder sb = {0};
 			R_DA_RESERVE(&sb, 8192);
@@ -131,8 +135,14 @@ void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 
 void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
 	switch (ev) {
+		case MG_EV_OPEN:
+			active_conns++;
+			break;
 		case MG_EV_HTTP_MSG:
 			ev_handle_http_msg(c, ev_data);
+			break;
+		case MG_EV_CLOSE:
+			active_conns--;
 			break;
 	}
 }
