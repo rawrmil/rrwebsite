@@ -41,9 +41,14 @@ struct a_config a_read_args(int argc, char* argv[]) {
 	aconf.web_dir = web_dir_default;
 
 	static struct option long_options[] = {
-		{"help", no_argument, 0, 'h'},
-		{"port", required_argument, 0, 'p'},
-		{"webdir", required_argument, 0, 'd'},
+		{"help",        no_argument,       0, 'h'},
+		{"port",        required_argument, 0, 'p'},
+		{"webdir",      required_argument, 0, 'd'},
+		{"log-none",    no_argument,       0, '0'},
+		{"log-error",   no_argument,       0, '1'},
+		{"log-info",    no_argument,       0, '2'},
+		{"log-debug",   no_argument,       0, '3'},
+		{"log-verbose", no_argument,       0, '4'},
 		{0, 0, 0, 0} // NULL-terminator
 	};
 
@@ -55,6 +60,8 @@ struct a_config a_read_args(int argc, char* argv[]) {
 				printf("Help:\n");
 				printf("--port, -p - specify running port for the server\n");
 				printf("--webdir, -d - specify director for the server to serve\n");
+				printf("--log-none-[none|error|info|debug|verbose], -[0|1|2|3|4]\n");
+				printf("    - specify log level\n");
 				exit(0);
 				break;
 			case 'p':
@@ -68,6 +75,11 @@ struct a_config a_read_args(int argc, char* argv[]) {
 			case 'd':
 				aconf.web_dir = optarg;
 				break;
+			case '0': mg_log_set(MG_LL_NONE);    break;
+			case '1': mg_log_set(MG_LL_ERROR);   break;
+			case '2': mg_log_set(MG_LL_INFO);    break;
+			case '3': mg_log_set(MG_LL_DEBUG);   break;
+			case '4': mg_log_set(MG_LL_VERBOSE); break;
 			default:
 				break;
 		}
@@ -156,6 +168,7 @@ int main(int argc, char* argv[]) {
 	mg_log_set(MG_LL_NONE);
 
 	aconf = a_read_args(argc, argv);
+	printf("log_level: %d\n", mg_log_level);
 	printf("aconf.web_dir: %s\n", aconf.web_dir);
 	printf("aconf.port: %d\n", aconf.port);
 
