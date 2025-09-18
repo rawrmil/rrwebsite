@@ -66,7 +66,6 @@ struct a_config a_read_args(int argc, char* argv[]) {
 				}
 				break;
 			case 'd':
-				printf("! %s\n", optarg);
 				aconf.web_dir = optarg;
 				break;
 			default:
@@ -157,7 +156,8 @@ int main(int argc, char* argv[]) {
 	mg_log_set(MG_LL_NONE);
 
 	aconf = a_read_args(argc, argv);
-	printf("! %s\n", aconf.web_dir);
+	printf("aconf.web_dir: %s\n", aconf.web_dir);
+	printf("aconf.port: %d\n", aconf.port);
 
 	struct mg_mgr mgr;
 	mg_mgr_init(&mgr);
