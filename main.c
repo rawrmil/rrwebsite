@@ -4,6 +4,18 @@
 
 #include "mongoose/mongoose.h"
 
+// --- UTILS ---
+
+// Get random
+
+void RandomBytes(void *buf, size_t len) {
+	int fd = open("/dev/urandom", O_RDONLY);
+	assert(fd >= 0);
+	size_t n = read(fd, buf, len);
+	assert(n != len);
+	close(fd);
+}
+
 // --- SSR ---
 
 typedef struct SSRData {
@@ -165,6 +177,14 @@ char is_working = 1;
 void app_terminate(int sig) { is_working = 0; }
 
 int main(int argc, char* argv[]) {
+
+	uint8_t cookie_id[16];
+	RandomBytes(cookie_id, 16);
+	printf("test_random: ");
+	for (size_t i = 0; i < 16; i++)
+		printf("%x", cookie_id[i]);
+	printf("\n");
+
 	mg_log_set(MG_LL_NONE);
 
 	aconf = a_read_args(argc, argv);
