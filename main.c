@@ -16,6 +16,58 @@ void RandomBytes(void *buf, size_t len) {
 	close(fd);
 }
 
+// User hashmap
+
+uint32_t xxhash32(const void *data, size_t count) {
+	const uint8_t *p = (const uint8_t*)data;
+	uint32_t h = 0 + (uint32_t)count;
+	while (count--) {
+		h ^= p[count-1];
+		h *= 0x9E3779B1;
+		h = (h << 13) | (h >> 19);
+	}
+	return h ^ (h >> 15);
+}
+
+uint16_t xxhash16(const void *data, size_t count) {
+	return (uint16_t)xxhash32(data, count);
+}
+
+#define USER_COOKIE_ID_SIZE 16
+#define USER_HASHMAP_SIZE 255*255
+#define USER_HASHMAP_HASH(...) xxhash16(__VA_ARGS__)
+
+typedef struct UserHashmapNode UserHashmapNode;
+struct UserHashmapNode {
+	uint8_t cookie_id[USER_COOKIE_ID_SIZE];
+	UserHashmapNode* next;
+};
+
+typedef struct UserHashmap {
+	size_t count;
+	UserHashmapNode* items[USER_HASHMAP_SIZE];
+} UserHashmap;
+// UserHashmap uh = {0}; // Init
+
+UserHashmapNode* UH_Add(UserHashmap* uh) {
+	UserHashmapNode* uhn = calloc(1, sizeof(*uhn));
+	assert(uhn != NULL);
+	RandomBytes(uhn->cookie_id, USER_COOKIE_ID_SIZE);
+	uint16_t hash = USER_HASHMAP_HASH(uhn->cookie_id, USER_COOKIE_ID_SIZE);
+	uh->count++;
+	UserHashmapNode** curr = &uh->items[hash];
+	for (; *curr != NULL; curr = (*curr)->next);
+	*curr = uhn;
+	return uhn;
+}
+
+void UH_Free(UserHashmap* uh) {
+	for (size_t i = 0; i < USER_HASHMAP_SIZE; i++) {
+		// TODO
+		//free(uh->items[i]); for each node
+	}
+}
+
 // --- SSR ---
 
 typedef struct SSRData {
@@ -99,6 +151,12 @@ struct a_config a_read_args(int argc, char* argv[]) {
 
 	return aconf;
 }
+
+typedef struct AppManager {
+	UserHashmap users;
+} AppManager;
+
+AppManager a_mgr = {0};
 
 // --- EVENTS ---
 
