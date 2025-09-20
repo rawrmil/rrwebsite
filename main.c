@@ -4,6 +4,18 @@
 
 #include "mongoose/mongoose.h"
 
+// --- UTILS ---
+
+// Get random
+
+void RandomBytes(void *buf, size_t len) {
+	int fd = open("/dev/urandom", O_RDONLY);
+	assert(fd >= 0);
+	size_t n = read(fd, buf, len);
+	assert(n != len);
+	close(fd);
+}
+
 // --- SSR ---
 
 typedef struct SSRData {
@@ -120,10 +132,63 @@ char http_is_lang_ru(struct mg_http_message* hm) {
 	return 0;
 }
 
+typedef struct RRUser {
+	uint8_t cookie_id[16];
+} RRUser;
+
+#define RRUSER_ARRAY_SIZE 256*256
+
+R_DA_DEFINE(RRUser, RRUserArray);
+RRUserArray users;
+
+RRUser* UA_Add(RRUserArray* users) {
+	RRUser user = {0};
+	RandomBytes(user.cookie_id, 16);
+	R_DA_APPEND(users, user);
+	return users->buf + users->len - 1;
+}
+
+// TODO: Query for non-confirmed cookie_id users
+
+RRUser* UA_GetByCookieID(RRUserArray* users, void* cookie_id) {
+	R_DA_FOREACH(RRUser, user, users) {
+		if (memcmp(user->cookie_id, cookie_id, 16) == 0)
+			return user;
+	}
+	return NULL;
+}
+
+RRUser* ProcessUser(struct mg_http_message* hm) {
+	struct mg_str* header_cookie = mg_http_get_header(hm, "Cookie");
+	if (header_cookie) {
+		struct mg_str var_id = mg_http_get_header_var(*header_cookie, mg_str("id"));
+		if (var_id.len == 0) return NULL;
+		MG_INFO(("id=%.*s*****", 5, var_id.buf));
+		uint8_t cookie_id[16];
+		if (var_id.len != 32) return NULL;
+		for (size_t i = 0; i < 16; i++) {
+			int flag = sscanf(var_id.buf+i*2, "%2hhx", &cookie_id[i]);
+			if (flag != 1) return NULL;
+		}
+		return UA_GetByCookieID(&users, cookie_id);
+	}
+	return NULL;
+}
+
 size_t active_conns = 0;
 
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
+	R_StringBuilder resp_headers = {0};
+	RRUser* user = ProcessUser(hm);
+	if (user == NULL) {
+		user = UA_Add(&users);
+		if (user == NULL) return;
+		R_SB_AppendFormat(&resp_headers, "Set-Cookie: id=");
+		for (size_t i = 0; i < 16; i++)
+			R_SB_AppendFormat(&resp_headers, "%x", user->cookie_id[i]);
+		R_SB_AppendFormat(&resp_headers, "\n");
+	}
 	if (!strncmp(hm->method.buf, "GET", 3)) {
 		SSRFuncPtr ssr_func_ptr = serve_page(c, hm);
 		if (ssr_func_ptr) {
@@ -135,7 +200,9 @@ void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 			R_DA_RESERVE(&sb, 8192);
 			//R_SB_APPEND_CSTR(&sb, "123");
 			(*ssr_func_ptr)(&sb, ssr_data);
-			mg_http_reply(c, 200, "", sb.buf);
+			R_DA_APPEND(&resp_headers, '\0');
+			mg_http_reply(c, 200, resp_headers.buf, sb.buf);
+			R_SB_FREE(&resp_headers);
 			R_SB_FREE(&sb);
 			return;
 		}
