@@ -204,14 +204,33 @@ UserHashmapNode* GetUser(struct mg_http_message* hm) {
 	return NULL;
 }
 
+typedef struct RRUser {
+	uint8_t id[16];
+} RRUser;
+
+DA_DEFINE(RRUser, RRUserArray);
+
+RRUser* GetUser(struct mg_http_message* hm) {
+	struct mg_str* header_cookie = mg_http_get_header(hm, "Cookie");
+	if (header_cookie) {
+		struct mg_str var_rrid = mg_http_get_header_var(*header_cookie, mg_str("id"));
+		if (var_rrid.len != 0) {
+			printf("cookie get\n");
+			return NULL;
+		}
+		MG_INFO("%.*s\n", var_rrid.len, var_rrid.buf);
+		printf("cookie add\n");
+	}
+	return NULL;
+}
+
 size_t active_conns = 0;
 
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
-	printf("%s\n", hm->method.buf);
+	GetUser(hm);
 	if (!strncmp(hm->method.buf, "GET", 3)) {
 		SSRFuncPtr ssr_func_ptr = serve_page(c, hm);
-		GetUser(hm);
 		if (ssr_func_ptr) {
 			SSRData ssr_data = {0};
 			ssr_data.lang_is_ru = http_is_lang_ru(hm);
