@@ -144,6 +144,8 @@ RRUserArray users;
 RRUser* UA_Add(RRUserArray* users) {
 	RRUser user = {0};
 	RandomBytes(user.cookie_id, 16);
+	uint8_t* b = user.cookie_id;
+	MG_INFO(("id=%02x%02x%02x*****%02x%02x", b[0], b[1], b[2], b[14], b[15]));
 	R_DA_APPEND(users, user);
 	return users->buf + users->len - 1;
 }
@@ -163,14 +165,18 @@ RRUser* ProcessUser(struct mg_http_message* hm) {
 	if (header_cookie) {
 		struct mg_str var_id = mg_http_get_header_var(*header_cookie, mg_str("id"));
 		if (var_id.len == 0) return NULL;
-		MG_INFO(("id=%.*s*****", 5, var_id.buf));
-		uint8_t cookie_id[16];
 		if (var_id.len != 32) return NULL;
+		uint8_t cookie_id[16];
 		for (size_t i = 0; i < 16; i++) {
 			int flag = sscanf(var_id.buf+i*2, "%2hhx", &cookie_id[i]);
 			if (flag != 1) return NULL;
 		}
-		return UA_GetByCookieID(&users, cookie_id);
+		uint8_t* b = cookie_id;
+		MG_INFO(("id=%02x%02x%02x*****%02x%02x", b[0], b[1], b[2], b[14], b[15]));
+		RRUser* user = UA_GetByCookieID(&users, cookie_id);
+		if (user != NULL)
+			MG_INFO(("user found."));
+		return user;
 	}
 	return NULL;
 }
@@ -186,7 +192,7 @@ void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 		if (user == NULL) return;
 		R_SB_AppendFormat(&resp_headers, "Set-Cookie: id=");
 		for (size_t i = 0; i < 16; i++)
-			R_SB_AppendFormat(&resp_headers, "%x", user->cookie_id[i]);
+			R_SB_AppendFormat(&resp_headers, "%02x", user->cookie_id[i]);
 		R_SB_AppendFormat(&resp_headers, "\n");
 	}
 	if (!strncmp(hm->method.buf, "GET", 3)) {
