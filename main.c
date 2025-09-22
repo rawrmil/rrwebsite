@@ -132,41 +132,39 @@ char http_is_lang_ru(struct mg_http_message* hm) {
 	return 0;
 }
 
-typedef struct RRUser {
+typedef struct Visitor {
 	uint8_t cookie_id[16];
 	bool is_pending;
-} RRUser;
+} Visitor;
 
-#define RRUSER_ARRAY_SIZE 256*256
+R_DA_DEFINE(Visitor, VisitorArray);
+VisitorArray visitors;
 
-R_DA_DEFINE(RRUser, RRUserArray);
-RRUserArray users;
-
-RRUser* UA_Add(RRUserArray* users) {
-	RRUser user = {0};
-	user.is_pending = 1;
-	RandomBytes(user.cookie_id, 16);
-	uint8_t* b = user.cookie_id;
+Visitor* VisitorsAddPending(VisitorArray* visitors) {
+	Visitor visitor = {0};
+	visitor.is_pending = 1;
+	RandomBytes(visitor.cookie_id, 16);
+	uint8_t* b = visitor.cookie_id;
 	MG_INFO(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
-	R_DA_APPEND(users, user);
-	return users->buf + users->len - 1;
+	R_DA_APPEND(visitors, visitor);
+	return visitors->buf + visitors->len - 1;
 }
 
-RRUser* UA_GetByCookieID(RRUserArray* users, void* cookie_id) {
-	R_DA_FOREACH(RRUser, user, users) {
-		if (memcmp(user->cookie_id, cookie_id, 16) == 0)
-			return user;
+Visitor* VisitorsGetByCookieID(VisitorArray* visitors, void* cookie_id) {
+	R_DA_FOREACH(Visitor, visitor, visitors) {
+		if (memcmp(visitor->cookie_id, cookie_id, 16) == 0)
+			return visitor;
 	}
 	return NULL;
 }
 
-RRUser* ProcessUser(struct mg_http_message* hm) {
+Visitor* ProcessVisitor(struct mg_http_message* hm) {
 	struct mg_str* header_cookie = mg_http_get_header(hm, "Cookie");
 	if (header_cookie) {
 		// Process cookie
 		struct mg_str var_id = mg_http_get_header_var(*header_cookie, mg_str("id"));
-		if (var_id.len == 0)  { MG_INFO(("cookie len = 0.")); return NULL; }
-		if (var_id.len != 32) { MG_INFO(("cookie len %d != 32", var_id.len)); return NULL; }
+		if (var_id.len == 0)  { MG_INFO(("cookie id length = 0.")); return NULL; }
+		if (var_id.len != 32) { MG_INFO(("cookie id length %d != 32", var_id.len)); return NULL; }
 		uint8_t cookie_id[16];
 		for (size_t i = 0; i < 16; i++) {
 			int flag = sscanf(var_id.buf+i*2, "%2hhx", &cookie_id[i]);
@@ -178,17 +176,17 @@ RRUser* ProcessUser(struct mg_http_message* hm) {
 		uint8_t* b = cookie_id;
 		MG_INFO(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
 		// Check if exists
-		RRUser* user = UA_GetByCookieID(&users, cookie_id);
-		if (user == NULL) {
-			MG_INFO(("user not found."));
+		Visitor* visitor = VisitorsGetByCookieID(&visitors, cookie_id);
+		if (visitor == NULL) {
+			MG_INFO(("visitor not found."));
 			return NULL;
 		}
-		MG_INFO(("user found."));
-		if (user->is_pending) {
-			MG_INFO(("user connection upgrade."));
-			user->is_pending = 0;
+		MG_INFO(("visitor found."));
+		if (visitor->is_pending) {
+			MG_INFO(("visitor connection upgrade."));
+			visitor->is_pending = 0;
 		}
-		return user;
+		return visitor;
 	}
 	return NULL;
 }
@@ -198,13 +196,13 @@ size_t active_conns = 0;
 void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 	R_StringBuilder resp_headers = {0};
-	RRUser* user = ProcessUser(hm);
-	if (user == NULL) {
-		user = UA_Add(&users);
-		if (user == NULL) return;
+	Visitor* visitor = ProcessVisitor(hm);
+	if (visitor == NULL) {
+		visitor = VisitorsAddPending(&visitors);
+		if (visitor == NULL) return;
 		R_SB_AppendFormat(&resp_headers, "Set-Cookie: id=");
 		for (size_t i = 0; i < 16; i++)
-			R_SB_AppendFormat(&resp_headers, "%02x", user->cookie_id[i]);
+			R_SB_AppendFormat(&resp_headers, "%02x", visitor->cookie_id[i]);
 		R_SB_AppendFormat(&resp_headers, "\n");
 	}
 	if (!strncmp(hm->method.buf, "GET", 3)) {
