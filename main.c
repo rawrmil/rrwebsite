@@ -6,8 +6,6 @@
 
 // --- UTILS ---
 
-// Get random
-
 void RandomBytes(void *buf, size_t len) {
 	int fd = open("/dev/urandom", O_RDONLY);
 	assert(fd >= 0);
@@ -102,35 +100,7 @@ struct a_config a_read_args(int argc, char* argv[]) {
 
 // --- EVENTS ---
 
-typedef void (*SSRFuncPtr)(R_StringBuilder*, SSRData);
-
-char rr_uricmp(struct mg_str uri, struct mg_str exp) {
-	if (uri.len < exp.len) return 0;
-	if (strncmp(uri.buf, exp.buf, exp.len) != 0) return 0;
-	for (size_t i = exp.len; i < uri.len; i++) { // Trailing '/'
-		if (uri.buf[i] != '/') return 0;
-	}
-	return 1;
-}
-
-#define SSR_MATCH(URI_, FUNC_) \
-	if (rr_uricmp(hm->uri, mg_str(URI_))) return FUNC_;
-
-SSRFuncPtr serve_page(struct mg_connection* c, struct mg_http_message* hm) {
-	// Longer ones first
-	SSR_MATCH("/", ssr_root);
-	return NULL;
-}
-
-char http_is_lang_ru(struct mg_http_message* hm) {
-	struct mg_str var_lang = mg_http_var(hm->query, mg_str("lang"));
-	if (var_lang.len >= 2)
-		return strncmp("ru", var_lang.buf, 2) == 0;
-	struct mg_str* header_lang = mg_http_get_header(hm, "Accept-Language");
-	if (header_lang && header_lang->len >= 2)
-		return strncmp("ru", header_lang->buf, 2) == 0;
-	return 0;
-}
+// -- Visitors --
 
 typedef struct Visitor {
 	uint8_t cookie_id[16];
@@ -158,7 +128,11 @@ Visitor* VisitorsGetByCookieID(VisitorArray* visitors, void* cookie_id) {
 	return NULL;
 }
 
-Visitor* ProcessVisitor(struct mg_http_message* hm) {
+size_t active_conns = 0;
+
+// -- HTTP --
+
+Visitor* HTTPProcessVisitor(struct mg_http_message* hm) {
 	struct mg_str* header_cookie = mg_http_get_header(hm, "Cookie");
 	if (header_cookie) {
 		// Process cookie
@@ -193,40 +167,84 @@ Visitor* ProcessVisitor(struct mg_http_message* hm) {
 	return NULL;
 }
 
-size_t active_conns = 0;
+typedef void (*SSRFuncPtr)(R_StringBuilder*, SSRData);
 
-void ev_handle_http_msg(struct mg_connection* c, void* ev_data) {
+char rr_uricmp(struct mg_str uri, struct mg_str exp) {
+	if (uri.len < exp.len) return 0;
+	if (strncmp(uri.buf, exp.buf, exp.len) != 0) return 0;
+	for (size_t i = exp.len; i < uri.len; i++) { // Trailing '/'
+		if (uri.buf[i] != '/') return 0;
+	}
+	return 1;
+}
+
+#define SSR_MATCH(URI_, FUNC_) \
+	if (rr_uricmp(hm->uri, mg_str(URI_))) return FUNC_;
+
+SSRFuncPtr HTTPServePage(struct mg_connection* c, struct mg_http_message* hm) {
+	// Longer ones first
+	SSR_MATCH("/", ssr_root);
+	return NULL;
+}
+
+char HTTPIsLangRu(struct mg_http_message* hm) {
+	struct mg_str var_lang = mg_http_var(hm->query, mg_str("lang"));
+	if (var_lang.len >= 2)
+		return strncmp("ru", var_lang.buf, 2) == 0;
+	struct mg_str* header_lang = mg_http_get_header(hm, "Accept-Language");
+	if (header_lang && header_lang->len >= 2)
+		return strncmp("ru", header_lang->buf, 2) == 0;
+	return 0;
+}
+
+Visitor* HTTPAddPendingVisitor(R_StringBuilder* resp_headers) {
+	Visitor* visitor = VisitorsAddPending(&visitors);
+	if (visitor == NULL) return NULL;
+	R_SB_AppendFormat(resp_headers, "Set-Cookie: id=");
+	for (size_t i = 0; i < 16; i++)
+		R_SB_AppendFormat(resp_headers, "%02x", visitor->cookie_id[i]);
+	R_SB_AppendFormat(resp_headers, "\n");
+	return visitor;
+}
+
+void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
+
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
+
+	R_StringBuilder sb = {0};
 	R_StringBuilder resp_headers = {0};
-	Visitor* visitor = ProcessVisitor(hm);
+
+	Visitor* visitor = HTTPProcessVisitor(hm);
 	if (visitor == NULL) {
-		visitor = VisitorsAddPending(&visitors);
-		if (visitor == NULL) return;
-		R_SB_AppendFormat(&resp_headers, "Set-Cookie: id=");
-		for (size_t i = 0; i < 16; i++)
-			R_SB_AppendFormat(&resp_headers, "%02x", visitor->cookie_id[i]);
-		R_SB_AppendFormat(&resp_headers, "\n");
+		visitor = HTTPAddPendingVisitor(&resp_headers);
+		if (visitor == NULL) goto cleanup;
 	}
+
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		SSRFuncPtr ssr_func_ptr = serve_page(c, hm);
-		if (ssr_func_ptr) {
-			SSRData ssr_data = {0};
-			ssr_data.lang_is_ru = http_is_lang_ru(hm);
-			ssr_data.active_conns = active_conns/2;
-			//mg_http_reply(c, 200, "", "123");
-			R_StringBuilder sb = {0};
-			R_DA_RESERVE(&sb, 8192);
-			//R_SB_APPEND_CSTR(&sb, "123");
-			(*ssr_func_ptr)(&sb, ssr_data);
-			R_DA_APPEND(&resp_headers, '\0');
-			mg_http_reply(c, 200, resp_headers.buf, sb.buf);
-			R_SB_FREE(&resp_headers);
-			R_SB_FREE(&sb);
-			return;
+		SSRFuncPtr ssr_func_ptr = HTTPServePage(c, hm);
+
+		if (!ssr_func_ptr) {
+			struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir };
+			mg_http_serve_dir(c, hm, &opts);
+			goto cleanup;
 		}
-		struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir };
-		mg_http_serve_dir(c, hm, &opts);
+
+		SSRData ssr_data = {0};
+		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
+		ssr_data.active_conns = active_conns/2;
+
+		R_DA_RESERVE(&sb, 8192);
+
+		(*ssr_func_ptr)(&sb, ssr_data);
+
+		R_DA_APPEND(&sb, '\0');
+		R_DA_APPEND(&resp_headers, '\0');
+
+		mg_http_reply(c, 200, resp_headers.buf, sb.buf);
 	}
+cleanup:
+	R_SB_FREE(&resp_headers);
+	R_SB_FREE(&sb);
 }
 
 void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
@@ -235,7 +253,7 @@ void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
 			active_conns++;
 			break;
 		case MG_EV_HTTP_MSG:
-			ev_handle_http_msg(c, ev_data);
+			HandleHTTPMessage(c, ev_data);
 			break;
 		case MG_EV_CLOSE:
 			active_conns--;
