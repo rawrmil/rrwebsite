@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <getopt.h>
+#include <time.h>
 
 #include "mongoose/mongoose.h"
 
@@ -103,9 +104,12 @@ struct a_config a_read_args(int argc, char* argv[]) {
 
 // -- Visitors --
 
+#define VISITOR_PENDING_SECONDS 5
+
 typedef struct Visitor {
 	uint8_t cookie_id[16];
-	bool is_pending;
+	time_t timestamp;
+	unsigned is_pending : 1;
 } Visitor;
 
 R_DA_DEFINE(Visitor, VisitorArray);
@@ -114,6 +118,7 @@ VisitorArray visitors;
 Visitor* VisitorsAddPending(VisitorArray* visitors) {
 	Visitor visitor = {0};
 	visitor.is_pending = 1;
+	visitor.timestamp = time(NULL);
 	RandomBytes(visitor.cookie_id, 16);
 	uint8_t* b = visitor.cookie_id;
 	MG_DEBUG(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
@@ -127,6 +132,20 @@ Visitor* VisitorsGetByCookieID(VisitorArray* visitors, void* cookie_id) {
 			return visitor;
 	}
 	return NULL;
+}
+
+void VisitorsDeleteExpired(VisitorArray* visitors) {
+	size_t i = 0;
+	R_DA_FOREACH(Visitor, visitor, visitors) {
+		if (visitor->is_pending) {
+			if (time(NULL) > visitor->timestamp+VISITOR_PENDING_SECONDS) {
+				R_DA_REMOVE_INDEX(visitors, i);
+				MG_INFO(("expired.\n"));
+			}
+			return;
+		}
+		i++;
+	}
 }
 
 size_t active_conns = 0;
@@ -260,6 +279,9 @@ void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
 			break;
 		case MG_EV_CLOSE:
 			active_conns--;
+			break;
+		case MG_EV_POLL:
+			VisitorsDeleteExpired(&visitors);
 			break;
 	}
 }
