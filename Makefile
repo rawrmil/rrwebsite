@@ -16,6 +16,7 @@ ssr_convert:
 	./ssr_convert web/index.html ssr_generated/ssr_root.h ssr_root
 	./ssr_convert web/templates/default-before.html ssr_generated/ssr_template_default_before.h ssr_template_default_before
 	./ssr_convert web/templates/default-after.html ssr_generated/ssr_template_default_after.h ssr_template_default_after
+	./ssr_convert web/page404.html ssr_generated/ssr_page404.h ssr_page404
 
 run: main
 	./$(BIN)

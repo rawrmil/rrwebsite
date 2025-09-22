@@ -35,6 +35,7 @@ typedef struct SSRData {
 #include "ssr_generated/ssr_template_default_before.h"
 #include "ssr_generated/ssr_template_default_after.h"
 #include "ssr_generated/ssr_root.h"
+#include "ssr_generated/ssr_page404.h"
 
 // --- APP ---
 
@@ -184,7 +185,9 @@ char rr_uricmp(struct mg_str uri, struct mg_str exp) {
 SSRFuncPtr HTTPServePage(struct mg_connection* c, struct mg_http_message* hm) {
 	// Longer ones first
 	SSR_MATCH("/", ssr_root);
-	return NULL;
+	for (size_t i = 0; i < hm->uri.len; i++)
+		if (hm->uri.buf[i] == '.') return NULL;
+	return ssr_page404;
 }
 
 char HTTPIsLangRu(struct mg_http_message* hm) {
