@@ -145,7 +145,7 @@ Visitor* VisitorsAddPending(VisitorArray* visitors) {
 	visitor.is_pending = 1;
 	RandomBytes(visitor.cookie_id, 16);
 	uint8_t* b = visitor.cookie_id;
-	MG_INFO(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
+	MG_DEBUG(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
 	R_DA_APPEND(visitors, visitor);
 	return visitors->buf + visitors->len - 1;
 }
@@ -163,27 +163,29 @@ Visitor* ProcessVisitor(struct mg_http_message* hm) {
 	if (header_cookie) {
 		// Process cookie
 		struct mg_str var_id = mg_http_get_header_var(*header_cookie, mg_str("id"));
-		if (var_id.len == 0)  { MG_INFO(("cookie id length = 0.")); return NULL; }
-		if (var_id.len != 32) { MG_INFO(("cookie id length %d != 32", var_id.len)); return NULL; }
+		if (var_id.len == 0 || var_id.len != 32) {
+			MG_DEBUG(("cookie id length %d is invalid", var_id.len));
+			return NULL;
+		}
 		uint8_t cookie_id[16];
 		for (size_t i = 0; i < 16; i++) {
 			int flag = sscanf(var_id.buf+i*2, "%2hhx", &cookie_id[i]);
 			if (flag != 1) {
-				MG_INFO(("parsing error."));
+				MG_DEBUG(("parsing error."));
 				return NULL;
 			}
 		}
 		uint8_t* b = cookie_id;
-		MG_INFO(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
+		MG_DEBUG(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
 		// Check if exists
 		Visitor* visitor = VisitorsGetByCookieID(&visitors, cookie_id);
 		if (visitor == NULL) {
-			MG_INFO(("visitor not found."));
+			MG_DEBUG(("visitor not found."));
 			return NULL;
 		}
-		MG_INFO(("visitor found."));
+		MG_DEBUG(("visitor found."));
 		if (visitor->is_pending) {
-			MG_INFO(("visitor connection upgrade."));
+			MG_DEBUG(("visitor connection upgrade."));
 			visitor->is_pending = 0;
 		}
 		return visitor;
