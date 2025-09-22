@@ -15,6 +15,10 @@ void RandomBytes(void *buf, size_t len) {
 	close(fd);
 }
 
+// --- GLOBALS ---
+
+size_t active_conns = 0;
+
 // --- SSR ---
 
 typedef struct SSRData {
@@ -105,10 +109,12 @@ struct a_config a_read_args(int argc, char* argv[]) {
 // -- Visitors --
 
 #define VISITOR_PENDING_SECONDS 5
+#define VISITOR_ACTIVE_SECONDS 360
 
 typedef struct Visitor {
 	uint8_t cookie_id[16];
-	time_t timestamp;
+	time_t time_created;
+	time_t time_last_active;
 	unsigned is_pending : 1;
 } Visitor;
 
@@ -118,7 +124,8 @@ VisitorArray visitors;
 Visitor* VisitorsAddPending(VisitorArray* visitors) {
 	Visitor visitor = {0};
 	visitor.is_pending = 1;
-	visitor.timestamp = time(NULL);
+	visitor.time_created = time(NULL);
+	visitor.time_last_active = time(NULL);
 	RandomBytes(visitor.cookie_id, 16);
 	uint8_t* b = visitor.cookie_id;
 	MG_DEBUG(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
@@ -134,21 +141,29 @@ Visitor* VisitorsGetByCookieID(VisitorArray* visitors, void* cookie_id) {
 	return NULL;
 }
 
-void VisitorsDeleteExpired(VisitorArray* visitors) {
+bool VisitorIsActive(Visitor* visitor);
+inline bool VisitorIsActive(Visitor* visitor) {
+	if (time(NULL) > visitor->time_last_active+VISITOR_ACTIVE_SECONDS) {
+		return false;
+	}
+	return true;
+}
+
+void VisitorsManageUnactive(VisitorArray* visitors) {
 	size_t i = 0;
+	active_conns = 0;
 	R_DA_FOREACH(Visitor, visitor, visitors) {
 		if (visitor->is_pending) {
-			if (time(NULL) > visitor->timestamp+VISITOR_PENDING_SECONDS) {
+			if (time(NULL) > visitor->time_created+VISITOR_PENDING_SECONDS) {
 				R_DA_REMOVE_INDEX(visitors, i);
 				MG_INFO(("expired.\n"));
+				return;
 			}
-			return;
 		}
+		if (VisitorIsActive(visitor)) active_conns++;
 		i++;
 	}
 }
-
-size_t active_conns = 0;
 
 // -- HTTP --
 
@@ -182,6 +197,7 @@ Visitor* HTTPProcessVisitor(struct mg_http_message* hm) {
 			MG_DEBUG(("visitor connection upgrade."));
 			visitor->is_pending = 0;
 		}
+		visitor->time_last_active = time(NULL);
 		return visitor;
 	}
 	return NULL;
@@ -253,7 +269,7 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 		SSRData ssr_data = {0};
 		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
-		ssr_data.active_conns = active_conns/2;
+		ssr_data.active_conns = active_conns;
 
 		R_DA_RESERVE(&sb, 8192);
 
@@ -271,17 +287,11 @@ cleanup:
 
 void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
 	switch (ev) {
-		case MG_EV_OPEN:
-			active_conns++;
-			break;
 		case MG_EV_HTTP_MSG:
 			HandleHTTPMessage(c, ev_data);
 			break;
-		case MG_EV_CLOSE:
-			active_conns--;
-			break;
 		case MG_EV_POLL:
-			VisitorsDeleteExpired(&visitors);
+			VisitorsManageUnactive(&visitors);
 			break;
 	}
 }
