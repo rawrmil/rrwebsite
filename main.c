@@ -150,7 +150,8 @@ void VisitorsManageUnactive(VisitorArray* visitors) {
 				return;
 			}
 		}
-		if (VisitorIsActive(visitor)) active_conns++;
+		if (!visitor->is_pending && VisitorIsActive(visitor))
+			active_conns++;
 		i++;
 	}
 }
