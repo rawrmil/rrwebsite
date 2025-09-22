@@ -134,6 +134,7 @@ char http_is_lang_ru(struct mg_http_message* hm) {
 
 typedef struct RRUser {
 	uint8_t cookie_id[16];
+	bool is_pending;
 } RRUser;
 
 #define RRUSER_ARRAY_SIZE 256*256
@@ -143,14 +144,13 @@ RRUserArray users;
 
 RRUser* UA_Add(RRUserArray* users) {
 	RRUser user = {0};
+	user.is_pending = 1;
 	RandomBytes(user.cookie_id, 16);
 	uint8_t* b = user.cookie_id;
-	MG_INFO(("id=%02x%02x%02x*****%02x%02x", b[0], b[1], b[2], b[14], b[15]));
+	MG_INFO(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
 	R_DA_APPEND(users, user);
 	return users->buf + users->len - 1;
 }
-
-// TODO: Query for non-confirmed cookie_id users
 
 RRUser* UA_GetByCookieID(RRUserArray* users, void* cookie_id) {
 	R_DA_FOREACH(RRUser, user, users) {
@@ -163,19 +163,31 @@ RRUser* UA_GetByCookieID(RRUserArray* users, void* cookie_id) {
 RRUser* ProcessUser(struct mg_http_message* hm) {
 	struct mg_str* header_cookie = mg_http_get_header(hm, "Cookie");
 	if (header_cookie) {
+		// Process cookie
 		struct mg_str var_id = mg_http_get_header_var(*header_cookie, mg_str("id"));
-		if (var_id.len == 0) return NULL;
-		if (var_id.len != 32) return NULL;
+		if (var_id.len == 0)  { MG_INFO(("cookie len = 0.")); return NULL; }
+		if (var_id.len != 32) { MG_INFO(("cookie len %d != 32", var_id.len)); return NULL; }
 		uint8_t cookie_id[16];
 		for (size_t i = 0; i < 16; i++) {
 			int flag = sscanf(var_id.buf+i*2, "%2hhx", &cookie_id[i]);
-			if (flag != 1) return NULL;
+			if (flag != 1) {
+				MG_INFO(("parsing error."));
+				return NULL;
+			}
 		}
 		uint8_t* b = cookie_id;
-		MG_INFO(("id=%02x%02x%02x*****%02x%02x", b[0], b[1], b[2], b[14], b[15]));
+		MG_INFO(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
+		// Check if exists
 		RRUser* user = UA_GetByCookieID(&users, cookie_id);
-		if (user != NULL)
-			MG_INFO(("user found."));
+		if (user == NULL) {
+			MG_INFO(("user not found."));
+			return NULL;
+		}
+		MG_INFO(("user found."));
+		if (user->is_pending) {
+			MG_INFO(("user connection upgrade."));
+			user->is_pending = 0;
+		}
 		return user;
 	}
 	return NULL;
