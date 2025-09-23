@@ -218,8 +218,8 @@ char URICompare(struct mg_str uri, struct mg_str exp) {
 	if (URICompare(hm->uri, mg_str(URI_))) return FUNC_;
 
 SSRFuncPtr HTTPServePage(struct mg_connection* c, struct mg_http_message* hm) {
-	// Longer ones first
 	SSR_MATCH("/", ssr_root);
+	SSR_MATCH("/home", ssr_root);
 	for (size_t i = 0; i < hm->uri.len; i++)
 		if (hm->uri.buf[i] == '.') return NULL;
 	return ssr_page404;
