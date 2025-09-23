@@ -18,7 +18,9 @@
 			justify-content: space-between;
 			position: fixed;
 			top: 0;
+			z-index: 1000;
 			color: white;
+			mix-blend-mode: difference;
 		}
 		body nav * {
 			display: flex;
@@ -31,25 +33,45 @@
 			font-family: LibertinusSerif;
 			z-index: 1000;
 		}
+		.rr-menu-link {
+			text-decoration: underline;
+			color: inherit;
+			color: cyan;
+			user-select: none;
+			-webkit-user-select: none;
+			font-family: NotoSans;
+			font-size: 20px;
+		}
+		.rr-horizontal-menu {
+			display: flex;
+		}
 		.rr-menu-toggle {
+			display: none;
 			font-size: 18px;
 			font-family: NotoSans;
 			z-index: 1000;
+		}
+		@media (max-width: 600px) {
+			.rr-menu-toggle { display: flex; }
+			.rr-horizontal-menu { display: none; }
 		}
 		.rr-menu-toggle label {
 			cursor: pointer;
 			-webkit-user-select: none;
 		}
-		nav input { display: none; }
+		#rr-menu-toggle { display: none; }
 		.rr-menu-overlay {
+			display: flex;
+			justify-content: space-evenly;
+			align-items: center;
+			position: absolute;
+			z-index: 0;
 			opacity: 0;
 			margin: 0;
 			position: fixed;
 			inset: 0 0 0 0;
 			display: flex;
 			color: #fff;
-			justify-content: center;
-			align-items: center;
 			pointer-events: none;
 			transition: .3s;
 			background: rgba(0,0,0,0.8);
@@ -88,11 +110,16 @@
 			<div class="rr-logo">
 				<span>RAWRMIL</span>
 			</div>
+			<div class="rr-horizontal-menu">
+				<div><a class="rr-menu-link" href="/home">home</a></div>
+				<div><a class="rr-menu-link" href="/about">about</a></div>
+			</div>
 			<div class="rr-menu-toggle">
 				<label for="rr-menu-toggle">MENU</label>
 			</div>
+		</nav>
 			<input type="checkbox" id="rr-menu-toggle">
 			<div class="rr-menu-overlay">
-				<h1>Menu Content</h1>
+				<div><a class="rr-menu-link" href="/home">home</a></div>
+				<div><a class="rr-menu-link" href="/about">about</a></div>
 			</div>
-		</nav>
