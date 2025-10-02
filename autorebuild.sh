@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ENTR_CMD="make main && ./rrwebsite \"$@\""
+ENTR_CMD="./nob && ./rrwebsite \"$@\""
 
 find . -type f \
 	-name "*.c" -o \
