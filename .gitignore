@@ -3,3 +3,5 @@ ssr_convert
 *.o
 web/res/
 ssr_generated/
+nob
+nob.old
