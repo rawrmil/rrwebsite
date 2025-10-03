@@ -1,0 +1,60 @@
+<!--%c ssr_template_default_before(ssr_sb, ssr_data); %-->
+<style>
+	.rr-content-pane {
+		display: flex;
+		flex-flow: row;
+		justify-content: center;
+		align-items: center;
+		width: 100vw;
+		min-height: 100vh;
+		background-color: #ffe;
+		box-sizing: border-box; /* No shrinking */
+		overflow: hidden;
+	}
+	article {
+    padding: 48px 1rem 64px 1rem;
+    width: clamp(50%, 600px, 95%);
+		height: 100%;
+    font-family: NotoSans;
+    line-height: 1.6;
+		background-color: #ccb;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #544;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #555;
+  }
+  p {
+    margin-bottom: 1rem;
+    color: #222;
+  }
+</style>
+<div class="rr-content-pane">
+	<article>
+		<h1>
+			<!--%c
+				SSR_RU_PRINTF("о нас");
+				SSR_EN_PRINTF("about");
+			%-->
+		</h1>
+		<h2>
+			<!--%c
+				SSR_RU_PRINTF("я");
+				SSR_EN_PRINTF("I");
+			%-->
+		</h2>
+		<p>
+			<!--%c
+				SSR_RU_PRINTF("я сущемтвую");
+				SSR_EN_PRINTF("i exist");
+			%-->
+		</p>
+		</article>
+	</div>
+</div>
+<!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->
