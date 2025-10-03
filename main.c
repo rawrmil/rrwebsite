@@ -40,6 +40,7 @@ typedef struct SSRData {
 #include "ssr_generated/ssr_template_default_before.h"
 #include "ssr_generated/ssr_template_default_after.h"
 #include "ssr_generated/ssr_root.h"
+#include "ssr_generated/ssr_about.h"
 #include "ssr_generated/ssr_page404.h"
 
 // --- APP ---
@@ -220,6 +221,7 @@ char URICompare(struct mg_str uri, struct mg_str exp) {
 SSRFuncPtr HTTPServePage(struct mg_connection* c, struct mg_http_message* hm) {
 	SSR_MATCH("/", ssr_root);
 	SSR_MATCH("/home", ssr_root);
+	SSR_MATCH("/about", ssr_about);
 	for (size_t i = 0; i < hm->uri.len; i++)
 		if (hm->uri.buf[i] == '.') return NULL;
 	return ssr_page404;

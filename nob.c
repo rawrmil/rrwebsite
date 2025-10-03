@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
 	}
 
 	SSR_CONVERT("web/index.html", "ssr_generated/ssr_root.h", "ssr_root");
+	SSR_CONVERT("web/about.html", "ssr_generated/ssr_about.h", "ssr_about");
 	SSR_CONVERT("web/page404.html", "ssr_generated/ssr_page404.h", "ssr_page404");
 	SSR_CONVERT("web/templates/default-after.html", "ssr_generated/ssr_template_default_after.h", "ssr_template_default_after");
 	SSR_CONVERT("web/templates/default-before.html", "ssr_generated/ssr_template_default_before.h", "ssr_template_default_before");
