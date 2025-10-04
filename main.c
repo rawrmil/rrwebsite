@@ -40,6 +40,7 @@ typedef struct SSRData {
 #include "ssr_generated/ssr_template_default_before.h"
 #include "ssr_generated/ssr_template_default_after.h"
 #include "ssr_generated/ssr_root.h"
+#include "ssr_generated/ssr_about.h"
 #include "ssr_generated/ssr_page404.h"
 
 // --- APP ---
@@ -206,7 +207,7 @@ Visitor* HTTPProcessVisitor(struct mg_http_message* hm) {
 
 typedef void (*SSRFuncPtr)(R_StringBuilder*, SSRData);
 
-char rr_uricmp(struct mg_str uri, struct mg_str exp) {
+char URICompare(struct mg_str uri, struct mg_str exp) {
 	if (uri.len < exp.len) return 0;
 	if (strncmp(uri.buf, exp.buf, exp.len) != 0) return 0;
 	for (size_t i = exp.len; i < uri.len; i++) { // Trailing '/'
@@ -216,11 +217,12 @@ char rr_uricmp(struct mg_str uri, struct mg_str exp) {
 }
 
 #define SSR_MATCH(URI_, FUNC_) \
-	if (rr_uricmp(hm->uri, mg_str(URI_))) return FUNC_;
+	if (URICompare(hm->uri, mg_str(URI_))) return FUNC_;
 
 SSRFuncPtr HTTPServePage(struct mg_connection* c, struct mg_http_message* hm) {
-	// Longer ones first
 	SSR_MATCH("/", ssr_root);
+	SSR_MATCH("/home", ssr_root);
+	SSR_MATCH("/about", ssr_about);
 	for (size_t i = 0; i < hm->uri.len; i++)
 		if (hm->uri.buf[i] == '.') return NULL;
 	return ssr_page404;
@@ -286,7 +288,7 @@ cleanup:
 	R_SB_FREE(&sb);
 }
 
-void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
+void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 	switch (ev) {
 		case MG_EV_HTTP_MSG:
 			HandleHTTPMessage(c, ev_data);
@@ -315,7 +317,7 @@ int main(int argc, char* argv[]) {
 	mg_mgr_init(&mgr);
 	char addrstr[32];
 	snprintf(addrstr, sizeof(addrstr), "http://0.0.0.0:%d", aconf.port);
-	mg_http_listen(&mgr, addrstr, ev_handler, NULL);
+	mg_http_listen(&mgr, addrstr, EventHandler, NULL);
 
 	signal(SIGINT, app_terminate);
 	signal(SIGTERM, app_terminate);

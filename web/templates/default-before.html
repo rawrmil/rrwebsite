@@ -10,6 +10,30 @@
 	<style>
 		/*body * { border: solid 1px red; }*/
 		body { margin: 0; }
+		:root {
+			--primary:    oklch(0.9 0.15 175);
+			--text:       oklch(0.92 0 180);
+			--text-muted: oklch(0.6 0 180);
+			--bg:         oklch(0.1 0 264);
+			--bg-dark:    oklch(0.2 0 264);
+			--bg-light:   oklch(0.25 0 264);
+			--shadow-s:
+				inset
+					0 1px 2px #ffffff30,
+					0 1px 2px #00000030,
+					0 2px 4px #00000015;
+			--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
+		}
+		@media (prefers-color-scheme: light) {
+		:root {
+			--primary:    oklch(0.5 0.8 180);
+			--text:       oklch(0.1 0 180);
+			--text-muted: oklch(0.6 0 180);
+			--bg:         oklch(0.92 0 264);
+			--bg-dark:    oklch(0.96 0 264);
+			--bg-light:   oklch(1 0 264);
+		}
+		}
 		/* --- NAVBAR --- */
 		body nav {
 			width: 100%;
@@ -18,7 +42,9 @@
 			justify-content: space-between;
 			position: fixed;
 			top: 0;
+			z-index: 1000;
 			color: white;
+			mix-blend-mode: difference;
 		}
 		body nav * {
 			display: flex;
@@ -31,7 +57,20 @@
 			font-family: LibertinusSerif;
 			z-index: 1000;
 		}
+		.rr-menu-link {
+			text-decoration: underline;
+			color: inherit;
+			color: var(--primary);
+			user-select: none;
+			-webkit-user-select: none;
+			font-family: NotoSans;
+			font-size: 20px;
+		}
+		.rr-horizontal-menu {
+			display: flex;
+		}
 		.rr-menu-toggle {
+			display: none;
 			font-size: 18px;
 			font-family: NotoSans;
 			z-index: 1000;
@@ -40,16 +79,19 @@
 			cursor: pointer;
 			-webkit-user-select: none;
 		}
-		nav input { display: none; }
+		#rr-menu-toggle { display: none; }
 		.rr-menu-overlay {
+			display: flex;
+			justify-content: space-evenly;
+			align-items: center;
+			position: absolute;
+			z-index: 999;
 			opacity: 0;
 			margin: 0;
 			position: fixed;
 			inset: 0 0 0 0;
 			display: flex;
 			color: #fff;
-			justify-content: center;
-			align-items: center;
 			pointer-events: none;
 			transition: .3s;
 			background: rgba(0,0,0,0.8);
@@ -58,25 +100,28 @@
 			opacity: 1;
 			pointer-events:auto;
 		}
+		@media (max-width: 600px) {
+			.rr-menu-overlay { display: flex !important; }
+			.rr-menu-toggle { display: flex; }
+			.rr-horizontal-menu { display: none; }
+		}
+		.rr-menu-overlay { display: none; }
 		/* --- FOOTER --- */
 		footer {
 			display: flex;
-			justify-content: space-between;
+			justify-content: flex-end;
+			align-items: flex-end;
+			gap: 10px;
 			font-family: NotoSans;
-			font-size: 24px;
-			padding: 5px 15px 5px 15px;
-			color: white;
-			background-color: black;
-		}
-		.rr-footer-right-wrap {
-			display: flex;
 			font-size: 16px;
-			gap: 8px;
+			padding: 10px 15px 17px 15px;
+			color: white;
+			background: var(--gradient-bg);
 		}
 		.rr-footer-language a {
 			text-decoration: underline;
 			color: inherit;
-			color: cyan;
+			color: var(--primary);
 			user-select: none;
 			-webkit-user-select: none;
 		}
@@ -84,18 +129,61 @@
 			text-decoration: none;
 			cursor: pointer;
 		}
-		.rr-footer-copyright { transform: skew(-20deg); color: gray; }
+		.rr-footer-copyright {
+			z-index: 1; /* not working */
+			transform: skew(-15deg);
+			color: var(--text-muted);
+			position: relative;
+		}
 	</style>
 	<body>
 		<nav>
 			<div class="rr-logo">
 				<span>RAWRMIL</span>
 			</div>
-			<div class="rr-menu-toggle">
-				<label for="rr-menu-toggle">MENU</label>
+			<div class="rr-horizontal-menu">
+				<div>
+					<a class="rr-menu-link" href="/home">
+						<!--%c
+							SSR_RU_PRINTF("главная");
+							SSR_EN_PRINTF("home");
+						%-->
+					</a>
+				</div>
+				<div>
+					<a class="rr-menu-link" href="/about">
+						<!--%c
+							SSR_RU_PRINTF("о нас");
+							SSR_EN_PRINTF("about");
+						%-->
+					</a>
+				</div>
 			</div>
-			<input type="checkbox" id="rr-menu-toggle">
-			<div class="rr-menu-overlay">
-				<h1>Menu Content</h1>
+			<div class="rr-menu-toggle">
+				<label for="rr-menu-toggle">
+					<!--%c
+						SSR_RU_PRINTF("МЕНЮ");
+						SSR_EN_PRINTF("MENU");
+					%-->
+				</label>
 			</div>
 		</nav>
+			<input type="checkbox" id="rr-menu-toggle">
+			<div class="rr-menu-overlay">
+				<div>
+					<a class="rr-menu-link" href="/home">
+						<!--%c
+							SSR_RU_PRINTF("главная");
+							SSR_EN_PRINTF("home");
+						%-->
+					</a>
+				</div>
+				<div>
+					<a class="rr-menu-link" href="/about">
+						<!--%c
+							SSR_RU_PRINTF("о нас");
+							SSR_EN_PRINTF("about");
+						%-->
+					</a>
+				</div>
+			</div>
