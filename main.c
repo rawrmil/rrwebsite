@@ -22,6 +22,7 @@ size_t active_conns = 0;
 // --- SSR ---
 
 typedef struct SSRData {
+	struct mg_http_message* hm;
 	char lang_is_ru;
 	size_t active_conns;
 } SSRData;
@@ -29,6 +30,12 @@ typedef struct SSRData {
 #define RRSTD_IMPLEMENTATION
 #include "rrstd.h"
 #include "ssr.h"
+
+#define SSR_PRINT_QUERY() \
+	do { \
+		SSR_PRINTF("%s", ssr_data.hm->query.len > 0 ? "?" : ""); \
+		SSR_PRINTF("%.*s", ssr_data.hm->query.len, ssr_data.hm->query.buf); \
+	} while (0);
 
 #define SSR_RU_PRINTF(...) \
 	if (ssr_data.lang_is_ru) { SSR_PRINTF(__VA_ARGS__); }
@@ -270,6 +277,7 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		}
 
 		SSRData ssr_data = {0};
+		ssr_data.hm = hm;
 		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
 		ssr_data.active_conns = active_conns;
 
