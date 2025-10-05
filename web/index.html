@@ -13,6 +13,11 @@
 		box-sizing: border-box; /* No shrinking */
 		overflow: hidden;
 	}
+	@media (prefers-color-scheme: dark) {
+		.rr-welcome-pane {
+			box-shadow: inset 0 0 0 100vmax rgba(0,0,0,0.65);
+		}
+	}
 	.rr-welcome-pane > * {
 		display: block;
 		flex: 1 0 250px;
