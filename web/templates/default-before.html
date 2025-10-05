@@ -57,7 +57,7 @@
 			font-family: LibertinusSerif;
 			z-index: 1000;
 		}
-		.rr-menu-link {
+		.rr-menu-link a {
 			text-decoration: underline;
 			color: inherit;
 			color: var(--primary);
@@ -142,21 +142,25 @@
 				<span>RAWRMIL</span>
 			</div>
 			<div class="rr-horizontal-menu">
-				<div>
-					<a class="rr-menu-link" href="/home">
-						<!--%c
-							SSR_RU_PRINTF("главная");
-							SSR_EN_PRINTF("home");
-						%-->
-					</a>
+				<div class="rr-menu-link">
+					<!--%c
+						SSR_PRINTF("<a href=\"/home");
+						SSR_PRINT_QUERY();
+						SSR_PRINTF("\">");
+								SSR_RU_PRINTF("главная");
+								SSR_EN_PRINTF("home");
+						SSR_PRINTF("</a>");
+					%-->
 				</div>
-				<div>
-					<a class="rr-menu-link" href="/about">
-						<!--%c
-							SSR_RU_PRINTF("о нас");
-							SSR_EN_PRINTF("about");
-						%-->
-					</a>
+				<div class="rr-menu-link">
+					<!--%c
+						SSR_PRINTF("<a href=\"/about");
+						SSR_PRINT_QUERY();
+						SSR_PRINTF("\">");
+								SSR_RU_PRINTF("о нас");
+								SSR_EN_PRINTF("about");
+						SSR_PRINTF("</a>");
+					%-->
 				</div>
 			</div>
 			<div class="rr-menu-toggle">
@@ -170,20 +174,24 @@
 		</nav>
 			<input type="checkbox" id="rr-menu-toggle">
 			<div class="rr-menu-overlay">
-				<div>
-					<a class="rr-menu-link" href="/home">
-						<!--%c
-							SSR_RU_PRINTF("главная");
-							SSR_EN_PRINTF("home");
-						%-->
-					</a>
+				<div class="rr-menu-link">
+					<!--%c
+						SSR_PRINTF("<a href=\"/home");
+						SSR_PRINT_QUERY();
+						SSR_PRINTF("\">");
+								SSR_RU_PRINTF("главная");
+								SSR_EN_PRINTF("home");
+						SSR_PRINTF("</a>");
+					%-->
 				</div>
-				<div>
-					<a class="rr-menu-link" href="/about">
-						<!--%c
-							SSR_RU_PRINTF("о нас");
-							SSR_EN_PRINTF("about");
-						%-->
-					</a>
+				<div class="rr-menu-link">
+					<!--%c
+						SSR_PRINTF("<a href=\"/about");
+						SSR_PRINT_QUERY();
+						SSR_PRINTF("\">");
+								SSR_RU_PRINTF("о нас");
+								SSR_EN_PRINTF("about");
+						SSR_PRINTF("</a>");
+					%-->
 				</div>
 			</div>
