@@ -14,8 +14,8 @@
 			--primary:    oklch(0.9 0.15 175);
 			--text:       oklch(0.92 0 180);
 			--text-muted: oklch(0.6 0 180);
-			--bg:         oklch(0.1 0 264);
-			--bg-dark:    oklch(0.2 0 264);
+			--bg-dark:    oklch(0.1 0 264);
+			--bg:         oklch(0.2 0 264);
 			--bg-light:   oklch(0.25 0 264);
 			--shadow-s:
 				inset
@@ -23,14 +23,15 @@
 					0 1px 2px #00000030,
 					0 2px 4px #00000015;
 			--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
+			--gradient-bg-h: linear-gradient(-90deg, var(--bg), var(--bg-light));
 		}
 		@media (prefers-color-scheme: light) {
 		:root {
 			--primary:    oklch(0.5 0.8 180);
 			--text:       oklch(0.1 0 180);
 			--text-muted: oklch(0.6 0 180);
-			--bg:         oklch(0.92 0 264);
-			--bg-dark:    oklch(0.96 0 264);
+			--bg-dark:    oklch(0.92 0 264);
+			--bg:         oklch(0.96 0 264);
 			--bg-light:   oklch(1 0 264);
 		}
 		}
@@ -115,7 +116,7 @@
 			font-family: NotoSans;
 			font-size: 16px;
 			padding: 10px 15px 17px 15px;
-			color: white;
+			color: var(--text-muted);
 			background: var(--gradient-bg);
 		}
 		.rr-footer-language a {
@@ -132,7 +133,6 @@
 		.rr-footer-copyright {
 			z-index: 1; /* not working */
 			transform: skew(-15deg);
-			color: var(--text-muted);
 			position: relative;
 		}
 	</style>

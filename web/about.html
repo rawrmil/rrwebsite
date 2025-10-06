@@ -12,24 +12,28 @@
 		overflow: hidden;
 	}
 	article {
-    padding: 48px 1rem 64px 1rem;
-    width: clamp(50%, 600px, 95%);
+    padding: 32px 1.25rem 48px 1.25rem;
+    width: clamp(50%, 600px, 85%);
 		height: 100%;
     font-family: NotoSans;
+		font-size: 32px;
     line-height: 1.6;
-		background-color: var(--bg-light);
+		border-radius: 15px;
+		background: var(--gradient-bg-h);
+		box-shadow: var(--shadow-s);
   }
-  h1 {
-    font-size: 2rem;
+  article h1 {
+		font-size: 2.5rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
-  h2 {
-    font-size: 1.5rem;
+  article h2 {
+		font-size: 2rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
-  p {
+  article p {
+    font-size: 1.1rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
