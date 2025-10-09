@@ -31,12 +31,12 @@ typedef struct SSRData {
 #include "rrstd.h"
 #include "ssr.h"
 
-#define SSR_PRINT_QUERY() \
+#define SSR_PRINT_LINK(URL_) \
 	do { \
+		SSR_PRINTF("%s", URL_); \
 		SSR_PRINTF("%s", ssr_data.hm->query.len > 0 ? "?" : ""); \
 		SSR_PRINTF("%.*s", ssr_data.hm->query.len, ssr_data.hm->query.buf); \
 	} while (0);
-
 #define SSR_RU_PRINTF(...) \
 	if (ssr_data.lang_is_ru) { SSR_PRINTF(__VA_ARGS__); }
 #define SSR_EN_PRINTF(...) \
