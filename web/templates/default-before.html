@@ -154,24 +154,20 @@
 			</div>
 			<div class="rr-horizontal-menu">
 				<div class="rr-menu-link">
-					<!--%c
-						SSR_PRINTF("<a href=\"/home");
-						SSR_PRINT_QUERY();
-						SSR_PRINTF("\">");
-								SSR_RU_PRINTF("главная");
-								SSR_EN_PRINTF("home");
-						SSR_PRINTF("</a>");
-					%-->
+					<a href='<!--%c SSR_PRINT_LINK("/home"); %-->'>
+						<!--%c
+							SSR_RU_PRINTF("главная");
+							SSR_EN_PRINTF("home");
+						%-->
+					</a>
 				</div>
 				<div class="rr-menu-link">
-					<!--%c
-						SSR_PRINTF("<a href=\"/about");
-						SSR_PRINT_QUERY();
-						SSR_PRINTF("\">");
-								SSR_RU_PRINTF("обо мне");
-								SSR_EN_PRINTF("about");
-						SSR_PRINTF("</a>");
-					%-->
+					<a href='<!--%c SSR_PRINT_LINK("/about"); %-->'>
+						<!--%c
+							SSR_RU_PRINTF("обо мне");
+							SSR_EN_PRINTF("about");
+						%-->
+					</a>
 				</div>
 			</div>
 			<div class="rr-menu-toggle">
@@ -186,23 +182,19 @@
 			<input type="checkbox" id="rr-menu-toggle">
 			<div class="rr-menu-overlay">
 				<div class="rr-menu-link">
-					<!--%c
-						SSR_PRINTF("<a href=\"/home");
-						SSR_PRINT_QUERY();
-						SSR_PRINTF("\">");
-								SSR_RU_PRINTF("главная");
-								SSR_EN_PRINTF("home");
-						SSR_PRINTF("</a>");
-					%-->
+					<a href='<!--%c SSR_PRINT_LINK("/home"); %-->'>
+						<!--%c
+							SSR_RU_PRINTF("главная");
+							SSR_EN_PRINTF("home");
+						%-->
+					</a>
 				</div>
 				<div class="rr-menu-link">
-					<!--%c
-						SSR_PRINTF("<a href=\"/about");
-						SSR_PRINT_QUERY();
-						SSR_PRINTF("\">");
-								SSR_RU_PRINTF("обо мне");
-								SSR_EN_PRINTF("about");
-						SSR_PRINTF("</a>");
-					%-->
+					<a href='<!--%c SSR_PRINT_LINK("/about"); %-->'>
+						<!--%c
+							SSR_RU_PRINTF("обо мне");
+							SSR_EN_PRINTF("about");
+						%-->
+					</a>
 				</div>
 			</div>
