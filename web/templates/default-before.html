@@ -24,6 +24,7 @@
 					0 2px 4px #00000015;
 			--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
 			--gradient-bg-h: linear-gradient(-90deg, var(--bg), var(--bg-light));
+			--shadow-text-s: 0.07rem 0.07rem 0.02rem var(--bg-dark);
 		}
 		@media (prefers-color-scheme: light) {
 		:root {
@@ -41,7 +42,7 @@
 			border-radius: 15px;
 			background: var(--gradient-bg-h);
 			box-shadow: var(--shadow-s);
-			text-shadow: 0.07rem 0.07rem 0.02rem var(--bg-dark);
+			text-shadow: var(--shadow-text-s);
 		}
 		/* --- NAVBAR --- */
 		body nav {
@@ -123,6 +124,7 @@
 			gap: 10px;
 			font-family: NotoSans;
 			font-size: 16px;
+			text-shadow: var(--shadow-text-s);
 			padding: 10px 15px 17px 15px;
 			color: var(--text-muted);
 			box-shadow: var(--shadow-s);
