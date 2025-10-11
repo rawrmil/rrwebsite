@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <getopt.h>
 #include <time.h>
 
+#define FLAG_IMPLEMENTATION
+#include "flag.h"
 #include "mongoose/mongoose.h"
 
 // --- UTILS ---
@@ -52,64 +55,33 @@ typedef struct SSRData {
 
 // --- APP ---
 
-char web_dir_default[] = "./web";
-
 struct a_config {
 	int port;
 	char* web_dir;
 } aconf;
 
-struct a_config a_read_args(int argc, char* argv[]) {
-	struct a_config aconf = {0};
-	aconf.port = 6969;
-	aconf.web_dir = web_dir_default;
+void a_parse_flags(int argc, char** argv) {
+	mg_log_set(MG_LL_NONE);
 
-	static struct option long_options[] = {
-		{"help",        no_argument,       0, 'h'},
-		{"port",        required_argument, 0, 'p'},
-		{"webdir",      required_argument, 0, 'd'},
-		{"log-none",    no_argument,       0, '0'},
-		{"log-error",   no_argument,       0, '1'},
-		{"log-info",    no_argument,       0, '2'},
-		{"log-debug",   no_argument,       0, '3'},
-		{"log-verbose", no_argument,       0, '4'},
-		{0, 0, 0, 0} // NULL-terminator
-	};
+	bool* f_help = flag_bool("help", 0, "help");
+	uint64_t* f_ll = flag_uint64("log-level", 0, "none, error, info, debug, verbose (0, 1, 2, 3, 4)");
+	uint64_t* f_port = flag_uint64("port", 6969, "port for the server");
+	char** f_web_dir = flag_str("webdir", "./web", "directory for the server");
 
-	int opt;
-	errno = 0;
-	while ((opt = getopt_long(argc, argv, "hp:d:", long_options, NULL)) != -1) {
-		switch (opt) {
-			case 'h':
-				printf("Help:\n");
-				printf("--port, -p - specify running port for the server\n");
-				printf("--webdir, -d - specify director for the server to serve\n");
-				printf("--log-none-[none|error|info|debug|verbose], -[0|1|2|3|4]\n");
-				printf("    - specify log level\n");
-				exit(0);
-				break;
-			case 'p':
-				char* endp;
-				aconf.port = strtol(optarg, &endp, 10);
-				if (errno || *endp != '\0') {
-					printf("--port argument is invalid (0-65535)\n");
-					exit(1);
-				}
-				break;
-			case 'd':
-				aconf.web_dir = optarg;
-				break;
-			case '0': mg_log_set(MG_LL_NONE);    break;
-			case '1': mg_log_set(MG_LL_ERROR);   break;
-			case '2': mg_log_set(MG_LL_INFO);    break;
-			case '3': mg_log_set(MG_LL_DEBUG);   break;
-			case '4': mg_log_set(MG_LL_VERBOSE); break;
-			default:
-				break;
-		}
+	if (!flag_parse(argc, argv)) {
+    flag_print_options(stderr);
+		flag_print_error(stderr);
+		exit(1);
 	}
 
-	return aconf;
+	if (*f_help) {
+    flag_print_options(stderr);
+		exit(0);
+	}
+
+	aconf.web_dir = *f_web_dir;
+	aconf.port = *f_port;
+	mg_log_set(*f_ll);
 }
 
 // --- EVENTS ---
@@ -313,9 +285,8 @@ char is_working = 1;
 void app_terminate(int sig) { is_working = 0; }
 
 int main(int argc, char* argv[]) {
-	mg_log_set(MG_LL_NONE);
+	a_parse_flags(argc, argv);
 
-	aconf = a_read_args(argc, argv);
 	printf("log_level: %d\n", mg_log_level);
 	printf("aconf.web_dir: %s\n", aconf.web_dir);
 	printf("aconf.port: %d\n", aconf.port);
