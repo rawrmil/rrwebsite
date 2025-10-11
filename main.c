@@ -14,7 +14,7 @@ void RandomBytes(void *buf, size_t len) {
 	int fd = open("/dev/urandom", O_RDONLY);
 	assert(fd >= 0);
 	size_t n = read(fd, buf, len);
-	assert(n != len);
+	assert(n == len);
 	close(fd);
 }
 
