@@ -8,6 +8,8 @@
 #include "flag.h"
 #include "mongoose/mongoose.h"
 
+#include "splashes.h"
+
 // --- UTILS ---
 
 void RandomBytes(void *buf, size_t len) {
