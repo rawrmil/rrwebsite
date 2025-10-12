@@ -10,6 +10,9 @@
 
 #include "splashes.h"
 
+#define NOB_IMPLEMENTATION
+#include "nob.h"
+
 // --- UTILS ---
 
 void RandomBytes(void *buf, size_t len) {
@@ -33,7 +36,6 @@ typedef struct SSRData {
 } SSRData;
 
 #define RRSTD_IMPLEMENTATION
-#include "rrstd.h"
 #include "ssr.h"
 
 #define SSR_PRINT_LINK(URL_) \
@@ -100,7 +102,12 @@ typedef struct Visitor {
 	unsigned is_pending : 1;
 } Visitor;
 
-R_DA_DEFINE(Visitor, VisitorArray);
+typedef struct {
+	size_t count;
+	size_t capacity;
+	Visitor* items;
+} VisitorArray;
+
 VisitorArray visitors;
 
 Visitor* VisitorsAddPending(VisitorArray* visitors) {
@@ -111,12 +118,12 @@ Visitor* VisitorsAddPending(VisitorArray* visitors) {
 	RandomBytes(visitor.cookie_id, 16);
 	uint8_t* b = visitor.cookie_id;
 	MG_DEBUG(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
-	R_DA_APPEND(visitors, visitor);
-	return visitors->buf + visitors->len - 1;
+	nob_da_append(visitors, visitor);
+	return visitors->items + visitors->count - 1;
 }
 
 Visitor* VisitorsGetByCookieID(VisitorArray* visitors, void* cookie_id) {
-	R_DA_FOREACH(Visitor, visitor, visitors) {
+	nob_da_foreach(Visitor, visitor, visitors) {
 		if (memcmp(visitor->cookie_id, cookie_id, 16) == 0)
 			return visitor;
 	}
@@ -134,10 +141,10 @@ inline bool VisitorIsActive(Visitor* visitor) {
 void VisitorsManageUnactive(VisitorArray* visitors) {
 	size_t i = 0;
 	active_conns = 0;
-	R_DA_FOREACH(Visitor, visitor, visitors) {
+	nob_da_foreach(Visitor, visitor, visitors) {
 		if (visitor->is_pending) {
 			if (time(NULL) > visitor->time_created+VISITOR_PENDING_SECONDS) {
-				R_DA_REMOVE_INDEX(visitors, i);
+				nob_da_remove_unordered(visitors, i);
 				MG_INFO(("expired.\n"));
 				return;
 			}
@@ -185,7 +192,7 @@ Visitor* HTTPProcessVisitor(struct mg_http_message* hm) {
 	return NULL;
 }
 
-typedef void (*SSRFuncPtr)(R_StringBuilder*, SSRData);
+typedef void (*SSRFuncPtr)(Nob_String_Builder*, SSRData);
 
 char URICompare(struct mg_str uri, struct mg_str exp) {
 	if (uri.len < exp.len) return 0;
@@ -218,13 +225,13 @@ char HTTPIsLangRu(struct mg_http_message* hm) {
 	return 0;
 }
 
-Visitor* HTTPAddPendingVisitor(R_StringBuilder* resp_headers) {
+Visitor* HTTPAddPendingVisitor(Nob_String_Builder* resp_headers) {
 	Visitor* visitor = VisitorsAddPending(&visitors);
 	if (visitor == NULL) return NULL;
-	R_SB_AppendFormat(resp_headers, "Set-Cookie: id=");
+	nob_sb_appendf(resp_headers, "Set-Cookie: id=");
 	for (size_t i = 0; i < 16; i++)
-		R_SB_AppendFormat(resp_headers, "%02x", visitor->cookie_id[i]);
-	R_SB_AppendFormat(resp_headers, "\n");
+		nob_sb_appendf(resp_headers, "%02x", visitor->cookie_id[i]);
+	nob_sb_appendf(resp_headers, "\n");
 	return visitor;
 }
 
@@ -232,8 +239,8 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 
-	R_StringBuilder sb = {0};
-	R_StringBuilder resp_headers = {0};
+	Nob_String_Builder sb = {0};
+	Nob_String_Builder resp_headers = {0};
 
 	Visitor* visitor = HTTPProcessVisitor(hm);
 	if (visitor == NULL) {
@@ -255,18 +262,18 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
 		ssr_data.active_conns = active_conns;
 
-		R_DA_RESERVE(&sb, 8192);
+		nob_da_reserve(&sb, 8192);
 
 		(*ssr_func_ptr)(&sb, ssr_data);
 
-		R_DA_APPEND(&sb, '\0');
-		R_DA_APPEND(&resp_headers, '\0');
+		nob_da_append(&sb, '\0');
+		nob_da_append(&resp_headers, '\0');
 
-		mg_http_reply(c, 200, resp_headers.buf, sb.buf);
+		mg_http_reply(c, 200, resp_headers.items, sb.items);
 	}
 cleanup:
-	R_SB_FREE(&resp_headers);
-	R_SB_FREE(&sb);
+	nob_sb_free(resp_headers);
+	nob_sb_free(sb);
 }
 
 void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
