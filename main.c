@@ -35,8 +35,8 @@ typedef struct SSRData {
 	size_t active_conns;
 } SSRData;
 
-#define RRSTD_IMPLEMENTATION
-#include "ssr.h"
+#define SSR_OUT(CSTR_) nob_sb_appendf(ssr_sb, "%s", CSTR_);
+#define SSR_PRINTF(...) nob_sb_appendf(ssr_sb, __VA_ARGS__);
 
 #define SSR_PRINT_LINK(URL_) \
 	do { \
