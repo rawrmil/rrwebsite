@@ -35,7 +35,7 @@
 		display: inline-block;
 		font-family: LibertinusSerif;
 		animation: w-pingpong 2.5s ease-in-out infinite;
-		text-shadow: -0.1em -0.1em var(--bg);
+		text-shadow: -0.1em -0.1em var(--text-muted);
 		transform: translateY(0.4em);
 	}
 	.rwelcome span:nth-child(1) { animation-delay: 0.0s; }
@@ -49,11 +49,11 @@
 	@keyframes w-pingpong {
 		0%, 100% {
 			transform: translateY(0.4em);
-			text-shadow: -0.1em -0.1em 0.0em var(--bg);
+			text-shadow: -0.1em -0.1em 0.0em var(--text-muted);
 		}
 		50% {
 			transform: translateY(-0.4em);
-			text-shadow: 0.1em 0.1em 0.0em var(--bg);
+			text-shadow: 0.1em 0.1em 0.0em var(--text-muted);
 		}
 	}
 	@keyframes w-pingpong-whole {
@@ -65,10 +65,10 @@
 		}
 	}
 	.rsplash {
-		color: var(--text-muted);
 		font-family: NotoSans;
 		font-size: 1em;
 		text-align: center;
+		color: var(--text);
 	}
 	.r-contact {
 		display: flex;
@@ -86,7 +86,7 @@
 	.r-contact-logos a {
 		display: block;
 		color: var(--text);
-		filter: drop-shadow(2px 2px 0px var(--bg))
+		filter: drop-shadow(2px 2px 0px var(--text-muted))
 	}
 	.r-contact-logos svg {
 		width: 10vh;
@@ -101,7 +101,7 @@
 	}
 	.r-contact-email a {
 		display: inline-block;
-		color: var(--primary);
+		color: var(--text);
 		transform: skewX(0deg);
 		transition: 0.1s ease-in-out;
 	}
