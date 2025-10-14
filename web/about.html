@@ -12,46 +12,43 @@
 		overflow: hidden;
 	}
 	article {
-    padding: 48px 1rem 64px 1rem;
-    width: clamp(50%, 600px, 95%);
+    width: clamp(50%, 600px, 85%);
 		height: 100%;
     font-family: NotoSans;
+		font-size: 32px;
     line-height: 1.6;
-		background-color: var(--bg-light);
+		margin: 10px;
   }
-  h1 {
-    font-size: 2rem;
+	article hr { border-color: var(--text-muted); }
+  article h1 {
+		font-size: 2.5rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
-  h2 {
-    font-size: 1.5rem;
+  article h2 {
+		font-size: 2rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
-  p {
+  article p {
+    font-size: 1.1rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
 </style>
 <div class="rr-content-pane">
-	<article>
+	<article class="rbox">
 		<h1>
 			<!--%c
-				SSR_RU_PRINTF("о нас");
-				SSR_EN_PRINTF("about");
+				SSR_RU_PRINTF("Обо мне");
+				SSR_EN_PRINTF("About");
 			%-->
 		</h1>
-		<h2>
-			<!--%c
-				SSR_RU_PRINTF("я");
-				SSR_EN_PRINTF("I");
-			%-->
-		</h2>
+		<hr>
 		<p>
 			<!--%c
-				SSR_RU_PRINTF("я сущемтвую");
-				SSR_EN_PRINTF("i exist");
+				SSR_RU_PRINTF("Привет, я Рамиль. Занимаюсь программированием с 2014 года. Python, C/C++, JS, Bash - неважно, я создаю продукт. Знаком c Linux, Docker, vi, gdb, gcc и т. п. Ценю и создаю простые и легко поддерживаемые решения.");
+				SSR_EN_PRINTF("Hi, I'm Ramil. I do programming since 2014. Python, C/C++, JavaScript, POSIX-shell/Bash - doesn't matter, I deliver products. Familiar with Linux, Docker, vi, gdb, gcc e.t.c. I value and make simple and maintainable solutions.");
 			%-->
 		</p>
 		</article>

@@ -1,9 +1,17 @@
 #include <stdio.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <getopt.h>
 #include <time.h>
 
+#define FLAG_IMPLEMENTATION
+#include "flag.h"
 #include "mongoose/mongoose.h"
+
+#include "splashes.h"
+
+#define NOB_IMPLEMENTATION
+#include "nob.h"
 
 // --- UTILS ---
 
@@ -11,7 +19,7 @@ void RandomBytes(void *buf, size_t len) {
 	int fd = open("/dev/urandom", O_RDONLY);
 	assert(fd >= 0);
 	size_t n = read(fd, buf, len);
-	assert(n != len);
+	assert(n == len);
 	close(fd);
 }
 
@@ -22,14 +30,20 @@ size_t active_conns = 0;
 // --- SSR ---
 
 typedef struct SSRData {
+	struct mg_http_message* hm;
 	char lang_is_ru;
 	size_t active_conns;
 } SSRData;
 
-#define RRSTD_IMPLEMENTATION
-#include "rrstd.h"
-#include "ssr.h"
+#define SSR_OUT(CSTR_) nob_sb_appendf(ssr_sb, "%s", CSTR_);
+#define SSR_PRINTF(...) nob_sb_appendf(ssr_sb, __VA_ARGS__);
 
+#define SSR_PRINT_LINK(URL_) \
+	do { \
+		SSR_PRINTF("%s", URL_); \
+		SSR_PRINTF("%s", ssr_data.hm->query.len > 0 ? "?" : ""); \
+		SSR_PRINTF("%.*s", ssr_data.hm->query.len, ssr_data.hm->query.buf); \
+	} while (0);
 #define SSR_RU_PRINTF(...) \
 	if (ssr_data.lang_is_ru) { SSR_PRINTF(__VA_ARGS__); }
 #define SSR_EN_PRINTF(...) \
@@ -45,64 +59,33 @@ typedef struct SSRData {
 
 // --- APP ---
 
-char web_dir_default[] = "./web";
-
 struct a_config {
 	int port;
 	char* web_dir;
 } aconf;
 
-struct a_config a_read_args(int argc, char* argv[]) {
-	struct a_config aconf = {0};
-	aconf.port = 6969;
-	aconf.web_dir = web_dir_default;
+void a_parse_flags(int argc, char** argv) {
+	mg_log_set(MG_LL_NONE);
 
-	static struct option long_options[] = {
-		{"help",        no_argument,       0, 'h'},
-		{"port",        required_argument, 0, 'p'},
-		{"webdir",      required_argument, 0, 'd'},
-		{"log-none",    no_argument,       0, '0'},
-		{"log-error",   no_argument,       0, '1'},
-		{"log-info",    no_argument,       0, '2'},
-		{"log-debug",   no_argument,       0, '3'},
-		{"log-verbose", no_argument,       0, '4'},
-		{0, 0, 0, 0} // NULL-terminator
-	};
+	bool* f_help = flag_bool("help", 0, "help");
+	uint64_t* f_ll = flag_uint64("log-level", 0, "none, error, info, debug, verbose (0, 1, 2, 3, 4)");
+	uint64_t* f_port = flag_uint64("port", 6969, "port for the server");
+	char** f_web_dir = flag_str("webdir", "./web", "directory for the server");
 
-	int opt;
-	errno = 0;
-	while ((opt = getopt_long(argc, argv, "hp:d:", long_options, NULL)) != -1) {
-		switch (opt) {
-			case 'h':
-				printf("Help:\n");
-				printf("--port, -p - specify running port for the server\n");
-				printf("--webdir, -d - specify director for the server to serve\n");
-				printf("--log-none-[none|error|info|debug|verbose], -[0|1|2|3|4]\n");
-				printf("    - specify log level\n");
-				exit(0);
-				break;
-			case 'p':
-				char* endp;
-				aconf.port = strtol(optarg, &endp, 10);
-				if (errno || *endp != '\0') {
-					printf("--port argument is invalid (0-65535)\n");
-					exit(1);
-				}
-				break;
-			case 'd':
-				aconf.web_dir = optarg;
-				break;
-			case '0': mg_log_set(MG_LL_NONE);    break;
-			case '1': mg_log_set(MG_LL_ERROR);   break;
-			case '2': mg_log_set(MG_LL_INFO);    break;
-			case '3': mg_log_set(MG_LL_DEBUG);   break;
-			case '4': mg_log_set(MG_LL_VERBOSE); break;
-			default:
-				break;
-		}
+	if (!flag_parse(argc, argv)) {
+    flag_print_options(stderr);
+		flag_print_error(stderr);
+		exit(1);
 	}
 
-	return aconf;
+	if (*f_help) {
+    flag_print_options(stderr);
+		exit(0);
+	}
+
+	aconf.web_dir = *f_web_dir;
+	aconf.port = *f_port;
+	mg_log_set(*f_ll);
 }
 
 // --- EVENTS ---
@@ -119,7 +102,12 @@ typedef struct Visitor {
 	unsigned is_pending : 1;
 } Visitor;
 
-R_DA_DEFINE(Visitor, VisitorArray);
+typedef struct {
+	size_t count;
+	size_t capacity;
+	Visitor* items;
+} VisitorArray;
+
 VisitorArray visitors;
 
 Visitor* VisitorsAddPending(VisitorArray* visitors) {
@@ -130,12 +118,12 @@ Visitor* VisitorsAddPending(VisitorArray* visitors) {
 	RandomBytes(visitor.cookie_id, 16);
 	uint8_t* b = visitor.cookie_id;
 	MG_DEBUG(("id=%02x%02x*****%02x", b[0], b[1], b[15]));
-	R_DA_APPEND(visitors, visitor);
-	return visitors->buf + visitors->len - 1;
+	nob_da_append(visitors, visitor);
+	return visitors->items + visitors->count - 1;
 }
 
 Visitor* VisitorsGetByCookieID(VisitorArray* visitors, void* cookie_id) {
-	R_DA_FOREACH(Visitor, visitor, visitors) {
+	nob_da_foreach(Visitor, visitor, visitors) {
 		if (memcmp(visitor->cookie_id, cookie_id, 16) == 0)
 			return visitor;
 	}
@@ -153,10 +141,10 @@ inline bool VisitorIsActive(Visitor* visitor) {
 void VisitorsManageUnactive(VisitorArray* visitors) {
 	size_t i = 0;
 	active_conns = 0;
-	R_DA_FOREACH(Visitor, visitor, visitors) {
+	nob_da_foreach(Visitor, visitor, visitors) {
 		if (visitor->is_pending) {
 			if (time(NULL) > visitor->time_created+VISITOR_PENDING_SECONDS) {
-				R_DA_REMOVE_INDEX(visitors, i);
+				nob_da_remove_unordered(visitors, i);
 				MG_INFO(("expired.\n"));
 				return;
 			}
@@ -205,7 +193,7 @@ Visitor* HTTPProcessVisitor(struct mg_http_message* hm) {
 	return NULL;
 }
 
-typedef void (*SSRFuncPtr)(R_StringBuilder*, SSRData);
+typedef void (*SSRFuncPtr)(Nob_String_Builder*, SSRData);
 
 char URICompare(struct mg_str uri, struct mg_str exp) {
 	if (uri.len < exp.len) return 0;
@@ -238,13 +226,13 @@ char HTTPIsLangRu(struct mg_http_message* hm) {
 	return 0;
 }
 
-Visitor* HTTPAddPendingVisitor(R_StringBuilder* resp_headers) {
+Visitor* HTTPAddPendingVisitor(Nob_String_Builder* resp_headers) {
 	Visitor* visitor = VisitorsAddPending(&visitors);
 	if (visitor == NULL) return NULL;
-	R_SB_AppendFormat(resp_headers, "Set-Cookie: id=");
+	nob_sb_appendf(resp_headers, "Set-Cookie: id=");
 	for (size_t i = 0; i < 16; i++)
-		R_SB_AppendFormat(resp_headers, "%02x", visitor->cookie_id[i]);
-	R_SB_AppendFormat(resp_headers, "\n");
+		nob_sb_appendf(resp_headers, "%02x", visitor->cookie_id[i]);
+	nob_sb_appendf(resp_headers, "\n");
 	return visitor;
 }
 
@@ -252,8 +240,8 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 
-	R_StringBuilder sb = {0};
-	R_StringBuilder resp_headers = {0};
+	Nob_String_Builder sb = {0};
+	Nob_String_Builder resp_headers = {0};
 
 	Visitor* visitor = HTTPProcessVisitor(hm);
 	if (visitor == NULL) {
@@ -271,21 +259,22 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		}
 
 		SSRData ssr_data = {0};
+		ssr_data.hm = hm;
 		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
 		ssr_data.active_conns = active_conns;
 
-		R_DA_RESERVE(&sb, 8192);
+		nob_da_reserve(&sb, 8192);
 
 		(*ssr_func_ptr)(&sb, ssr_data);
 
-		R_DA_APPEND(&sb, '\0');
-		R_DA_APPEND(&resp_headers, '\0');
+		nob_da_append(&sb, '\0');
+		nob_da_append(&resp_headers, '\0');
 
-		mg_http_reply(c, 200, resp_headers.buf, sb.buf);
+		mg_http_reply(c, 200, resp_headers.items, sb.items);
 	}
 cleanup:
-	R_SB_FREE(&resp_headers);
-	R_SB_FREE(&sb);
+	nob_sb_free(resp_headers);
+	nob_sb_free(sb);
 }
 
 void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
@@ -306,9 +295,8 @@ char is_working = 1;
 void app_terminate(int sig) { is_working = 0; }
 
 int main(int argc, char* argv[]) {
-	mg_log_set(MG_LL_NONE);
+	a_parse_flags(argc, argv);
 
-	aconf = a_read_args(argc, argv);
 	printf("log_level: %d\n", mg_log_level);
 	printf("aconf.web_dir: %s\n", aconf.web_dir);
 	printf("aconf.port: %d\n", aconf.port);

@@ -11,28 +11,38 @@
 		/*body * { border: solid 1px red; }*/
 		body { margin: 0; }
 		:root {
-			--primary:    oklch(0.9 0.15 175);
-			--text:       oklch(0.92 0 180);
-			--text-muted: oklch(0.6 0 180);
-			--bg:         oklch(0.1 0 264);
-			--bg-dark:    oklch(0.2 0 264);
-			--bg-light:   oklch(0.25 0 264);
+			--primary:    #01fdf2;
+			--text:       #fff5f5;
+			--text-muted: #909295;
+			--bg-dark:    #010203;
+			--bg:         #151617;
+			--bg-light:   #262626;
 			--shadow-s:
 				inset
 					0 1px 2px #ffffff30,
 					0 1px 2px #00000030,
 					0 2px 4px #00000015;
 			--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
+			--gradient-bg-h: linear-gradient(-90deg, var(--bg), var(--bg-light));
+			--shadow-text-s: 0.07rem 0.07rem 0.0rem var(--bg-light);
 		}
 		@media (prefers-color-scheme: light) {
 		:root {
-			--primary:    oklch(0.5 0.8 180);
-			--text:       oklch(0.1 0 180);
-			--text-muted: oklch(0.6 0 180);
-			--bg:         oklch(0.92 0 264);
-			--bg-dark:    oklch(0.96 0 264);
-			--bg-light:   oklch(1 0 264);
+			--primary:    #fe5060;
+			--text:       #010203;
+			--text-muted: #909295;
+			--bg-dark:    #000;
+			--bg:         #f6f3ef;
+			--bg-light:   #fefeff;
 		}
+		}
+		/* --- ELEMENTS --- */
+		.rbox {
+			padding: 24px 1.25rem 32px 1.25rem;
+			border-radius: 15px;
+			background: var(--gradient-bg-h);
+			box-shadow: var(--shadow-s);
+			text-shadow: var(--shadow-text-s);
 		}
 		/* --- NAVBAR --- */
 		body nav {
@@ -57,7 +67,7 @@
 			font-family: LibertinusSerif;
 			z-index: 1000;
 		}
-		.rr-menu-link {
+		.rr-menu-link a {
 			text-decoration: underline;
 			color: inherit;
 			color: var(--primary);
@@ -114,8 +124,10 @@
 			gap: 10px;
 			font-family: NotoSans;
 			font-size: 16px;
+			text-shadow: var(--shadow-text-s);
 			padding: 10px 15px 17px 15px;
-			color: white;
+			color: var(--text-muted);
+			box-shadow: var(--shadow-s);
 			background: var(--gradient-bg);
 		}
 		.rr-footer-language a {
@@ -132,7 +144,6 @@
 		.rr-footer-copyright {
 			z-index: 1; /* not working */
 			transform: skew(-15deg);
-			color: var(--text-muted);
 			position: relative;
 		}
 	</style>
@@ -142,18 +153,18 @@
 				<span>RAWRMIL</span>
 			</div>
 			<div class="rr-horizontal-menu">
-				<div>
-					<a class="rr-menu-link" href="/home">
+				<div class="rr-menu-link">
+					<a href='<!--%c SSR_PRINT_LINK("/home"); %-->'>
 						<!--%c
 							SSR_RU_PRINTF("главная");
 							SSR_EN_PRINTF("home");
 						%-->
 					</a>
 				</div>
-				<div>
-					<a class="rr-menu-link" href="/about">
+				<div class="rr-menu-link">
+					<a href='<!--%c SSR_PRINT_LINK("/about"); %-->'>
 						<!--%c
-							SSR_RU_PRINTF("о нас");
+							SSR_RU_PRINTF("обо мне");
 							SSR_EN_PRINTF("about");
 						%-->
 					</a>
@@ -170,18 +181,18 @@
 		</nav>
 			<input type="checkbox" id="rr-menu-toggle">
 			<div class="rr-menu-overlay">
-				<div>
-					<a class="rr-menu-link" href="/home">
+				<div class="rr-menu-link">
+					<a href='<!--%c SSR_PRINT_LINK("/home"); %-->'>
 						<!--%c
 							SSR_RU_PRINTF("главная");
 							SSR_EN_PRINTF("home");
 						%-->
 					</a>
 				</div>
-				<div>
-					<a class="rr-menu-link" href="/about">
+				<div class="rr-menu-link">
+					<a href='<!--%c SSR_PRINT_LINK("/about"); %-->'>
 						<!--%c
-							SSR_RU_PRINTF("о нас");
+							SSR_RU_PRINTF("обо мне");
 							SSR_EN_PRINTF("about");
 						%-->
 					</a>

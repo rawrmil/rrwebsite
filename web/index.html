@@ -3,9 +3,10 @@
 	/* --- WELCOME PANE --- */
 	.rr-welcome-pane {
 		display: flex;
+		flex-direction: column;
+		gap: 70px;
 		justify-content: center;
 		align-items: center;
-		gap: 10px;
 		width: 100vw;
 		min-height: 100vh;
 		background: url("res/images/background2.webp") no-repeat center/cover black;
@@ -13,44 +14,134 @@
 		box-sizing: border-box; /* No shrinking */
 		overflow: hidden;
 	}
-	.rr-welcome-pane > * {
-		display: block;
-		flex: 1 0 250px;
+	@media (prefers-color-scheme: dark) {
+		.rr-welcome-pane {
+			box-shadow: inset 0 0 0 100vmax rgba(0,0,0,0.65);
+		}
 	}
-	.rr-welcome-pane div {
-		max-width: clamp(50%, 600px, 100%);
-		flex-grow: 3;
-		color: white;
-		font-size: 18px;
+	.rwelcome {
+		display: block;
+		color: var(--text);
+		font-size: 10vw;
+		transform: skewY(15deg);
+		animation: w-pingpong-whole 7.5s ease-in-out infinite;
+	}
+	@media (max-width: 600px) {
+	.rwelcome {
+		font-size: 20vw;
+	}
+	}
+	.rwelcome span {
+		display: inline-block;
+		font-family: LibertinusSerif;
+		animation: w-pingpong 2.5s ease-in-out infinite;
+		text-shadow: -0.1em -0.1em var(--text-muted);
+		transform: translateY(0.4em);
+	}
+	.rwelcome span:nth-child(1) { animation-delay: 0.0s; }
+	.rwelcome span:nth-child(2) { animation-delay: 0.2s; }
+	.rwelcome span:nth-child(3) { animation-delay: 0.4s; }
+	.rwelcome span:nth-child(4) { animation-delay: 0.6s; }
+	.rwelcome span:nth-child(5) { animation-delay: 0.8s; }
+	.rwelcome span:nth-child(6) { animation-delay: 1.0s; }
+	.rwelcome span:nth-child(7) { animation-delay: 1.2s; }
+	.rwelcome span:nth-child(8) { animation-delay: 1.4s; }
+	@keyframes w-pingpong {
+		0%, 100% {
+			transform: translateY(0.4em);
+			text-shadow: -0.1em -0.1em 0.0em var(--text-muted);
+			opacity: 0.5;
+		}
+		50% {
+			transform: translateY(-0.4em);
+			text-shadow: 0.1em 0.1em 0.0em var(--text-muted);
+			opacity: 1.0;
+		}
+	}
+	@keyframes w-pingpong-whole {
+		0%, 100% {
+			transform: skewY(15deg);
+		}
+		50% {
+			transform: skewY(-15deg);
+		}
+	}
+	.rsplash {
 		font-family: NotoSans;
+		font-size: 1em;
+		text-align: center;
+		color: var(--text);
+	}
+	.r-contact {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		font-family: NotoSans;
+		color: var(--primary);
+		width: 90%;
+	}
+	.r-contact-logos {
+		display: flex;
+		gap: 10px;
+	}
+	.r-contact-logos a {
+		display: block;
+		color: var(--text);
+		filter: drop-shadow(2px 2px 0px var(--text-muted))
+	}
+	.r-contact-logos svg {
+		width: 45px;
+		heigth: 45px;
+		fill: currentColor;
+		cursor: poiter;
+		text-decoration: none;
+		transition: 0.1s ease-in-out;
+	}
+	.r-contact-logos svg:hover {
+		transform: scaleX(1.15) scaleY(0.9);
+	}
+	.r-contact-email span {
+		display: inline-block;
+		color: var(--text);
+		transform: skewX(0deg);
 	}
 </style>
 <div class="rr-welcome-pane">
-	<div>
-		<h1>
+	<div class="rwelcome">
+		<!--%c
+			SSR_PRINTF("<span>w</span>");
+			SSR_PRINTF("<span>e</span>");
+			SSR_PRINTF("<span>l</span>");
+			SSR_PRINTF("<span>c</span>");
+			SSR_PRINTF("<span>o</span>");
+			SSR_PRINTF("<span>m</span>");
+			SSR_PRINTF("<span>e</span>");
+		%-->
+	</div>
+	<div class="rsplash">
+		<span>
 			<!--%c
-				SSR_RU_PRINTF("разработчик");
-				SSR_EN_PRINTF("developer");
+				SSR_PRINTF("%s", SPLASHES_GET(ssr_data.lang_is_ru));
 			%-->
-		</h1>
-		<h2>
-			<!--%c
-				SSR_RU_PRINTF("и не только");
-				SSR_EN_PRINTF("and more");
-			%-->
-		</h2>
-		<p>
-			<!--%c
-				SSR_RU_PRINTF("всем привет, это мой крутой вебсайт. здесь пока ничего толком нет, но просто подождите");
-				SSR_EN_PRINTF("hello guys, this is my cool website. there's not much here yet but yeah just wait");
-			%-->
-		</p>
-		<p>
-			<!--%c
-				SSR_RU_PRINTF("активные подключения: %zu", ssr_data.active_conns);
-				SSR_EN_PRINTF("active connections: %zu", ssr_data.active_conns);
-			%-->
-		</p>
+		</span>
+	</div>
+	<div class="r-contact">
+		<div class="r-contact-logos">
+			<a href="https://github.com/rawrmil">
+				<svg width="100" height="100" aria-hidden="true" viewBox="0 0 24 24" version="1.1" data-view-component="true">
+					<path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"></path>
+				</svg>
+			</a>
+			<a href="https://t.me/rawrmil">
+				<svg width="100" height="100" viewBox="0 0 50 50">
+					<path d="M25,2c12.703,0,23,10.297,23,23S37.703,48,25,48S2,37.703,2,25S12.297,2,25,2z M32.934,34.375	c0.423-1.298,2.405-14.234,2.65-16.783c0.074-0.772-0.17-1.285-0.648-1.514c-0.578-0.278-1.434-0.139-2.427,0.219	c-1.362,0.491-18.774,7.884-19.78,8.312c-0.954,0.405-1.856,0.847-1.856,1.487c0,0.45,0.267,0.703,1.003,0.966	c0.766,0.273,2.695,0.858,3.834,1.172c1.097,0.303,2.346,0.04,3.046-0.395c0.742-0.461,9.305-6.191,9.92-6.693	c0.614-0.502,1.104,0.141,0.602,0.644c-0.502,0.502-6.38,6.207-7.155,6.997c-0.941,0.959-0.273,1.953,0.358,2.351	c0.721,0.454,5.906,3.932,6.687,4.49c0.781,0.558,1.573,0.811,2.298,0.811C32.191,36.439,32.573,35.484,32.934,34.375z"></path>
+				</svg>
+			</a>
+		</div>
+		<div class="r-contact-email">
+			<span>khasanshin.ramil@list.ru</span>
+		</div>
 	</div>
 </div>
 <!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->
