@@ -11,12 +11,12 @@
 		/*body * { border: solid 1px red; }*/
 		body { margin: 0; }
 		:root {
-			--primary:    oklch(0.9 0.15 175);
-			--text:       oklch(0.92 0 180);
-			--text-muted: oklch(0.6 0 180);
-			--bg-dark:    oklch(0.1 0 264);
-			--bg:         oklch(0.2 0 264);
-			--bg-light:   oklch(0.25 0 264);
+			--primary:    #01fdf2;
+			--text:       #fff5f5;
+			--text-muted: #909295;
+			--bg-dark:    #010203;
+			--bg:         #151617;
+			--bg-light:   #262626;
 			--shadow-s:
 				inset
 					0 1px 2px #ffffff30,
@@ -24,16 +24,16 @@
 					0 2px 4px #00000015;
 			--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
 			--gradient-bg-h: linear-gradient(-90deg, var(--bg), var(--bg-light));
-			--shadow-text-s: 0.07rem 0.07rem 0.02rem var(--bg-dark);
+			--shadow-text-s: 0.07rem 0.07rem 0.0rem var(--bg-light);
 		}
 		@media (prefers-color-scheme: light) {
 		:root {
-			--primary:    oklch(0.5 0.8 180);
-			--text:       oklch(0.23 0 180);
-			--text-muted: oklch(0.6 0 180);
-			--bg-dark:    oklch(0.92 0 264);
-			--bg:         oklch(0.96 0 264);
-			--bg-light:   oklch(1 0 264);
+			--primary:    #fe5060;
+			--text:       #010203;
+			--text-muted: #909295;
+			--bg-dark:    #000;
+			--bg:         #f6f3ef;
+			--bg-light:   #fefeff;
 		}
 		}
 		/* --- ELEMENTS --- */
