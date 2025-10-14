@@ -22,21 +22,22 @@
 	.rwelcome {
 		display: block;
 		color: var(--text);
-		font-size: 10vw;
+		font-size: 8vw;
 		transform: skewY(15deg);
 		animation: w-pingpong-whole 7.5s ease-in-out infinite;
 	}
 	@media (max-width: 600px) {
 	.rwelcome {
-		font-size: 20vw;
+		font-size: 18vw;
 	}
 	}
 	.rwelcome span {
 		display: inline-block;
 		font-family: LibertinusSerif;
 		animation: w-pingpong 2.5s ease-in-out infinite;
-		text-shadow: -0.1em -0.1em var(--text-muted);
+		text-shadow: -0.07em -0.07em var(--text-muted);
 		transform: translateY(0.4em);
+		opacity: 0.5;
 	}
 	.rwelcome span:nth-child(1) { animation-delay: 0.0s; }
 	.rwelcome span:nth-child(2) { animation-delay: 0.2s; }
@@ -49,21 +50,21 @@
 	@keyframes w-pingpong {
 		0%, 100% {
 			transform: translateY(0.4em);
-			text-shadow: -0.1em -0.1em 0.0em var(--text-muted);
+			text-shadow: -0.07em -0.07em 0.0em var(--text-muted);
 			opacity: 0.5;
 		}
 		50% {
 			transform: translateY(-0.4em);
-			text-shadow: 0.1em 0.1em 0.0em var(--text-muted);
+			text-shadow: 0.07em 0.07em 0.0em var(--text-muted);
 			opacity: 1.0;
 		}
 	}
 	@keyframes w-pingpong-whole {
 		0%, 100% {
-			transform: skewY(15deg);
+			transform: skewY(12deg);
 		}
 		50% {
-			transform: skewY(-15deg);
+			transform: skewY(-12deg);
 		}
 	}
 	.rsplash {
