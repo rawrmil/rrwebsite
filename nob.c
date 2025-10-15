@@ -28,9 +28,9 @@ int main(int argc, char** argv) {
 	SSRConvert("web/index.html", "ssr_generated/ssr_root.h", "ssr_root");
 	SSRConvert("web/about.html", "ssr_generated/ssr_about.h", "ssr_about");
 	SSRConvert("web/page404.html", "ssr_generated/ssr_page404.h", "ssr_page404");
+	SSRConvert("web/calc/mna.html", "ssr_generated/ssr_calc_mna.h", "ssr_calc_mna");
 	SSRConvert("web/templates/default-after.html", "ssr_generated/ssr_template_default_after.h", "ssr_template_default_after");
 	SSRConvert("web/templates/default-before.html", "ssr_generated/ssr_template_default_before.h", "ssr_template_default_before");
-
 	
 	cmd_append(&cmd, CC, "main.c", "-o", "rrwebsite");
 	cmd_append(&cmd, "lib/mongoose.o");
