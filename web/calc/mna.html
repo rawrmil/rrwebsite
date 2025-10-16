@@ -1,14 +1,5 @@
 <!--%c ssr_template_default_before(ssr_sb, ssr_data); %-->
 
-<h1>
-	<!--%c
-		SSR_EN_PRINTF("MNA (Modified Nodal Analysis)");
-		SSR_RU_PRINTF("МУП (Метод Узловых Потенциалов)");
-	%-->
-</h1>
-
-<hr>
-
 <style>
 #calc-field em {
 	color: var(--col-sp);
@@ -16,54 +7,66 @@
 }
 </style>
 
-<div class=".rbox" id="calc-field">
-	<p>
-		<!--%c
-			SSR_EN_PRINTF("Enter circuit information in this format <i>[node1] [node2] [type_name] [value]</i> for each element separated by \",\". Possible element types: <b>u (voltage source)</b>, <b>i (current source)</b>, <b>r (resistor)</b>. Polarity: u - node1-, node2+; i - node1-, node2+; r - node1+, node2-. Each element must have name (or index)");
-			SSR_RU_PRINTF("Введите цепь в формате <i>[узел1] [узел2] [тип_имя] [значение]</i> для каждого элемента через \",\". Возможные типы элементов: <b>u (источник напряжения)</b>, <b>i (источник тока)</b>, <b>r (резистивный элемент)</b>. Полярность: u - узел1-, узел2+; i - узел1-, узел2+; r - узел1+, узел2-. У каждого элемента должно быть имя (либо номер)");
-		%-->
-	</p>
-	<p>
-		<!--%c
-			SSR_EN_PRINTF("Circuit");
-			SSR_RU_PRINTF("Цепь");
-		%-->
-		<textarea id="circ-text" >1 2 u0 3, 2 3 r1 2, 3 1 i2 2, 3 1 r3 1</textarea><br>
-	</p>
-	<p>
-		<button id="calc" style="margin: auto;">
+<div class="rcontent">
+	<div class="rbox" id="calc-field">
+		<h1>
 			<!--%c
-				SSR_EN_PRINTF("Let's go");
-				SSR_RU_PRINTF("Погнали");
+				SSR_EN_PRINTF("MNA (Modified Nodal Analysis)");
+				SSR_RU_PRINTF("МУП (Метод Узловых Потенциалов)");
 			%-->
-		</button>
-	</p>
-	<p>
-		<em id="error-field"></em>
-	</p>
-	<hr>
-	<p>
+		</h1>
+		<hr>
+		<p>
 			<!--%c
-				SSR_EN_PRINTF("System of equations:");
-				SSR_RU_PRINTF("Система уравнений:");
+				SSR_EN_PRINTF("Enter circuit information in this format <i>[node1] [node2] [type_name] [value]</i> for each element separated by \",\". Possible element types: <b>u (voltage source)</b>, <b>i (current source)</b>, <b>r (resistor)</b>. Polarity: u - node1-, node2+; i - node1-, node2+; r - node1+, node2-. Each element must have name (or index)");
+				SSR_RU_PRINTF("Введите цепь в формате <i>[узел1] [узел2] [тип_имя] [значение]</i> для каждого элемента через \",\". Возможные типы элементов: <b>u (источник напряжения)</b>, <b>i (источник тока)</b>, <b>r (резистивный элемент)</b>. Полярность: u - узел1-, узел2+; i - узел1-, узел2+; r - узел1+, узел2-. У каждого элемента должно быть имя (либо номер)");
 			%-->
-		<br>
-		<em id="system-field"></em>
-		<br>
+		</p>
+		<p>
 			<!--%c
-				SSR_EN_PRINTF("Answers:");
-				SSR_RU_PRINTF("Ответы:");
+				SSR_EN_PRINTF("Circuit:");
+				SSR_RU_PRINTF("Цепь:");
 			%-->
-		<br>
-		<em id="answer-field"></em>
-		<br>
-			<!--%c
-				SSR_EN_PRINTF("Currents and voltages:");
-				SSR_RU_PRINTF("Токи и напряжения:");
-			%-->
-		<br>
-		<em id="cv-field"></em>
-	</p>
+			<br>
+			<div class="rcontent-flex" style="display: flex; justify-content: center;">
+				<textarea id="circ-text" style="overflow-y: hidden; width: 80%; max-width: 100%; min-width: 20%; height: 80px; font-size: 1rem;">1 2 u0 3, 2 3 r1 2, 3 1 i2 2, 3 1 r3 1</textarea><br>
+			</div>
+		</p>
+		<p>
+			<button id="calc" style="font-size: 1rem;">
+				<!--%c
+					SSR_EN_PRINTF("Let's go");
+					SSR_RU_PRINTF("Погнали");
+				%-->
+			</button>
+		</p>
+		<p>
+			<em id="error-field"></em>
+		</p>
+		<hr>
+		<p>
+				<!--%c
+					SSR_EN_PRINTF("System of equations:");
+					SSR_RU_PRINTF("Система уравнений:");
+				%-->
+			<br>
+			<em id="system-field"></em>
+			<br>
+				<!--%c
+					SSR_EN_PRINTF("Answers:");
+					SSR_RU_PRINTF("Ответы:");
+				%-->
+			<br>
+			<em id="answer-field"></em>
+			<br>
+				<!--%c
+					SSR_EN_PRINTF("Currents and voltages:");
+					SSR_RU_PRINTF("Токи и напряжения:");
+				%-->
+			<br>
+			<em id="cv-field"></em>
+		</p>
+	</div>
 </div>
 
 <script src="/lib/numeric/numeric.js"></script>
