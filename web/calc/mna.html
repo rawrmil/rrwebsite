@@ -1,11 +1,5 @@
 <!--%c ssr_template_default_before(ssr_sb, ssr_data); %-->
 
-<style>
-	body {
-		background-color: white;
-	}
-</style>
-
 <h1>
 	<!--%c
 		SSR_EN_PRINTF("MNA (Modified Nodal Analysis)");
@@ -22,7 +16,7 @@
 }
 </style>
 
-<div id="calc-field">
+<div class=".rbox" id="calc-field">
 	<p>
 		<!--%c
 			SSR_EN_PRINTF("Enter circuit information in this format <i>[node1] [node2] [type_name] [value]</i> for each element separated by \",\". Possible element types: <b>u (voltage source)</b>, <b>i (current source)</b>, <b>r (resistor)</b>. Polarity: u - node1-, node2+; i - node1-, node2+; r - node1+, node2-. Each element must have name (or index)");
