@@ -1,6 +1,6 @@
 <!--%c ssr_template_default_before(ssr_sb, ssr_data); %-->
 <style>
-	.rr-content-pane {
+	.rcontent {
 		display: flex;
 		flex-flow: row;
 		justify-content: center;
@@ -11,7 +11,7 @@
 		box-sizing: border-box; /* No shrinking */
 		overflow: hidden;
 	}
-	article {
+	.rbox {
     width: clamp(50%, 600px, 85%);
 		height: 100%;
     font-family: NotoSans;
@@ -19,24 +19,24 @@
     line-height: 1.6;
 		margin: 10px;
   }
-	article hr { border-color: var(--text-muted); }
-  article h1 {
+	.rbox hr { border-color: var(--text-muted); }
+  .rbox h1 {
 		font-size: 2.5rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
-  article h2 {
+  .rbox h2 {
 		font-size: 2rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
-  article p {
+  .rbox p {
     font-size: 1.1rem;
     margin-bottom: 1rem;
     color: var(--text);
   }
 </style>
-<div class="rr-content-pane">
+<div class="rcontent">
 	<article class="rbox">
 		<h1>
 			<!--%c
