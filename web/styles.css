@@ -8,12 +8,16 @@ body { margin: 0; }
 	--bg-dark:    #090909;
 	--bg:         #151514;
 	--bg-light:   #272727;
-  --shadow-s: inset 0 1px 2px #ffffff30,0 1px 2px #00000030, 0 2px 4px #00000015;
+  --shadow-s: inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
   --shadow-m: inset 0 1px 2px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015; 
   --shadow-l: inset 0 1px 2px #ffffff70, 0 4px 6px #00000030, 0 6px 10px #00000015;
+	--shadow-s-in: inset 0 -1px 2px #ffffff30, 0 -1px 2px #00000030, 0 -2px 4px #00000015;
+	--shadow-m-in: inset 0 -1px 2px #ffffff50, 0 -2px 4px #00000030, 0 -4px 8px #00000015; 
+	--shadow-l-in: inset 0 -1px 2px #ffffff70, 0 -4px 6px #00000030, 0 -6px 10px #00000015;
 	--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
 	--gradient-bg-h: linear-gradient(-90deg, var(--bg), var(--bg-light));
 	--shadow-text-s: 0.07rem 0.07rem 0.0rem var(--bg-light);
+	--ease: 0.1s ease-in-out;
 }
 @media (prefers-color-scheme: light) {
 :root {
@@ -205,16 +209,32 @@ footer {
 	color: var(--text);
 }
 .rbox button {
+	font-size: 1rem;
 	padding: 0.2rem 0.5rem;
 	background: var(--bg-light);	
 	box-shadow: var(--shadow-s);
 	border: none;
 	border-radius: 3px;
 	color: var(--text);
+	transition: var(--ease);
 }
 .rbox button:hover {
 	box-shadow: var(--shadow-l);
 }
 .rbox button:active {
-	transform: scaleX(0.98);
+	box-shadow: var(--shadow-s-in);
+}
+.rbox textarea {
+	font-size: 1rem;
+	padding: 0.2rem 0.5rem;
+	color: var(--text);
+	background: var(--bg-light);	
+	box-shadow: var(--shadow-s);
+	border: none;
+	border-radius: 3px;
+	transition: var(--ease);
+}
+.rbox textarea:focus {
+	outline: none;
+	box-shadow: var(--shadow-s-in);
 }
