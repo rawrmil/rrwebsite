@@ -129,7 +129,6 @@ footer {
 }
 /* --- CONTENT --- */
 /*.rcontent {
-	padding-top: 40px;
 	display: flex;
 	flex-flow: row;
 	justify-content: center;
@@ -170,6 +169,7 @@ footer {
 	color: var(--text);
 }
 .rcontent {
+	padding-top: 40px;
 	display: flex;
 	flex-flow: row;
 	justify-content: center;
