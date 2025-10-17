@@ -181,6 +181,10 @@ footer {
 	margin-bottom: 1rem;
 	color: var(--text);
 }
+.rbox a {
+	font-size: 1rem;
+	color: var(--primary);
+}
 /* --- Button --- */
 .rbox button {
 	font-size: 1rem;
