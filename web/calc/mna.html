@@ -18,8 +18,8 @@
 		<hr>
 		<p>
 			<!--%c
-				SSR_EN_PRINTF("Enter circuit information in this format <i>[node1] [node2] [type_name] [value]</i> for each element separated by \",\". Possible element types: <b>u (voltage source)</b>, <b>i (current source)</b>, <b>r (resistor)</b>. Polarity: u - node1-, node2+; i - node1-, node2+; r - node1+, node2-. Each element must have name (or index)");
-				SSR_RU_PRINTF("Введите цепь в формате <i>[узел1] [узел2] [тип_имя] [значение]</i> для каждого элемента через \",\". Возможные типы элементов: <b>u (источник напряжения)</b>, <b>i (источник тока)</b>, <b>r (резистивный элемент)</b>. Полярность: u - узел1-, узел2+; i - узел1-, узел2+; r - узел1+, узел2-. У каждого элемента должно быть имя (либо номер)");
+				SSR_EN_PRINTF("Enter circuit information in this format <i>[node1] [node2] [type_name] [value]</i> for each element separated by \",\". Possible element types: <b>u (voltage source)</b>, <b>i (current source)</b>, <b>r (resistor/impedance)</b>. Polarity: u - node1-, node2+; i - node1-, node2+; r - node1+, node2-. Each element must have name (or index)");
+				SSR_RU_PRINTF("Введите цепь в формате <i>[узел1] [узел2] [тип_имя] [значение]</i> для каждого элемента через \",\". Возможные типы элементов: <b>u (источник напряжения)</b>, <b>i (источник тока)</b>, <b>r (резистивный/импедансный элемент)</b>. Полярность: u - узел1-, узел2+; i - узел1-, узел2+; r - узел1+, узел2-. У каждого элемента должно быть имя (либо номер)");
 			%-->
 		</p>
 		<p>
@@ -29,7 +29,7 @@
 			%-->
 			<br>
 			<div class="rcontent-flex" style="display: flex; justify-content: center;">
-				<textarea id="circ-text" style="overflow-y: hidden; width: 80%; max-width: 100%; min-width: 20%; height: 80px; font-size: 1rem;">1 2 u0 3, 2 3 r1 2, 3 1 i2 2, 3 1 r3 1</textarea><br>
+				<textarea id="circ-text" style="overflow-y: hidden; width: 80%; max-width: 100%; min-width: 20%; height: 80px; font-size: 1rem;">1 2 u0 3, 2 3 r1 2, 3 1 r3 1+i</textarea><br>
 			</div>
 		</p>
 		<p>
@@ -104,6 +104,13 @@
 	var answerField = document.getElementById("answer-field");
 	var cvField = document.getElementById("cv-field");
 
+	function complexFixed(c) {
+		var n = 3;
+		s = `${c.re.toFixed(n)}`;
+		if (Math.round(c.im, n) != 0)
+			s += ` + ${c.im.toFixed(n)}i`;
+		return s;
+	}
 	function CALC_ERROR(errorMsgId, args) {
 		var text = errors[errorMsgId];
 		for (var i = 0; i < args.length; i++) {
@@ -141,8 +148,8 @@
 				return CALC_ERROR("emsg-type", [i+1]);
 			}
 			// Value check
-			const eVal = parseFloat(circ[i][3]);
-			if (isNaN(eVal))
+			const eVal = math.complex(circ[i][3]);
+			if (!eVal)
 				return CALC_ERROR("emsg-value-parsing", [i+1, circ[i][3]]);
 			circ[i][3] = eVal;
 
@@ -181,25 +188,25 @@
 			var t = circ[i][2];
 			var v = circ[i][3];
 			if (circ[i][2] == 'R') {
-				A[n1][n1] += 1/v;
-				A[n2][n2] += 1/v;
-				A[n1][n2] -= 1/v;
-				A[n2][n1] -= 1/v;
+				A[n1][n1] = math.add(A[n1][n1], math.inv(v));
+				A[n2][n2] = math.add(A[n2][n2], math.inv(v));
+				A[n1][n2] = math.subtract(A[n1][n2], math.inv(v));
+				A[n2][n1] = math.subtract(A[n2][n1], math.inv(v));
 				Asys[n1][n1] += '+G'+elNames[i];
 				Asys[n2][n2] += '+G'+elNames[i];
 				Asys[n1][n2] += '-G'+elNames[i];
 				Asys[n2][n1] += '-G'+elNames[i];
 			} else if (circ[i][2] == 'I') {
-				b[n1] = -v;
-				b[n2] = +v;
+				b[n1] = math.unaryMinus(v);
+				b[n2] = v;
 				bsys[n1] = "-i"+elNames[i];
 				bsys[n2] = "+i"+elNames[i];
 			} else if (circ[i][2] == 'U') {
 				var j = nodeCount+vsrcs.length;
-				A[n1][j] = -1;
-				A[n2][j] = +1;
-				A[j][n1] = -1;
-				A[j][n2] = +1;
+				A[n1][j] = math.complex(-1, 0);
+				A[n2][j] = math.complex(+1, 0);
+				A[j][n1] = math.complex(-1, 0);
+				A[j][n2] = math.complex(+1, 0);
 				b[j] = v;
 				Asys[n1][j] = " - i"+elNames[i];
 				Asys[n2][j] = " + i"+elNames[i];
@@ -222,16 +229,15 @@
 		try {
 			sol = math.lusolve(A, b).flat();
 		} catch (error) {
-			alert(error);
 			return CALC_ERROR("emsg-ill-formed", []);
 		}
 		answerField.innerHTML = "";
 		for (var i = 0; i < nodeCount-1; i++) {
-			answerField.innerHTML += "φ"+nodeNames[i]+" = "+sol[i].toFixed(7)+"<br>";
+			answerField.innerHTML += "φ"+nodeNames[i]+" = "+complexFixed(sol[i])+"<br>";
 		}
 		answerField.innerHTML += "φ"+nodeNames[nodeNames.length-1]+" = 0<br>";
 		for (var i = 0; i < vsrcs.length; i++) {
-			answerField.innerHTML += "i"+elNames[vsrcs[i]]+" = "+(-sol[nodeCount+i-1].toFixed(7))+"<br>";
+			answerField.innerHTML += "i"+elNames[vsrcs[i]]+" = "+complexFixed(math.unaryMinus(sol[nodeCount+i-1]))+"<br>";
 		}
 		systemField.innerHTML = "";
 		for (var r = 0; r < msize-1; r++) {
@@ -256,23 +262,24 @@
 		for (var i = 0; i < circ.length; i++) {
 			var p1 = (circ[i][0] == nodeCount-1 ? 0 : sol[circ[i][0]]);
 			var p2 = (circ[i][1] == nodeCount-1 ? 0 : sol[circ[i][1]]);
-			var U = p2-p1;
+			var U = math.subtract(p2, p1);
 			var I = null;
 			var R = null;
 			if (circ[i][2] == 'R') {
-				U = -U
-				R = +circ[i][3];
-				I = U/R;
+				U = math.unaryMinus(U)
+				R = circ[i][3];
+				I = math.divide(U, R);
 			} else if (circ[i][2] == 'I') {
-				I = +circ[i][3];
-				R = U/I;
+				I = circ[i][3];
+				R = math.divide(U, I);
 			} else {
-				I = -sol[nodeCount-1+vsrcs.indexOf(i)];
-				R = U/I;
+				I = math.unaryMinus(sol[nodeCount-1+vsrcs.indexOf(i)]);
+				R = math.divide(U, I);
 			}
-			cvField.innerHTML += 'u'+elNames[i]+" = "+U.toFixed(7)+", ";
-			cvField.innerHTML += 'i'+elNames[i]+" = "+I.toFixed(7)+", ";
-			cvField.innerHTML += 'R'+elNames[i]+" = "+R.toFixed(7)+"<br>";
+			cvField.innerHTML += 'u'+elNames[i]+" = "+complexFixed(U)+"<br>";
+			cvField.innerHTML += 'i'+elNames[i]+" = "+complexFixed(I)+"<br>";
+			cvField.innerHTML += 'R'+elNames[i]+" = "+complexFixed(R)+"<br>";
+			cvField.innerHTML += i==circ.length-1 ? '' : '<hr>';
 		}
 	});
 	const beforeUnloadHandler = (event) => {
