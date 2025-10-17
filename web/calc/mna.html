@@ -69,7 +69,7 @@
 	</div>
 </div>
 
-<script src="/lib/numeric/numeric.js"></script>
+<script src="/lib/mathjs/math.min.js"></script>
 <script>
 	errors = {
 		'emsg-empty': `<!--%c
@@ -220,8 +220,9 @@
 		// S O L V E
 		var sol = null;
 		try {
-			sol = numeric.solve(A, b);
+			sol = math.lusolve(A, b).flat();
 		} catch (error) {
+			alert(error);
 			return CALC_ERROR("emsg-ill-formed", []);
 		}
 		answerField.innerHTML = "";
