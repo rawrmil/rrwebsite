@@ -3,9 +3,11 @@ My cool website
 
 ## Deploy
 ```sh
-make
-./rrwebsite --port 6969 --webdir web
-# Check nginx_proxy_example.conf
+g sm init
+g sm update
+gcc nob.c -o nob
+./nob
+./rrwebsite --port 6969
 ```
 
 ## Commits
