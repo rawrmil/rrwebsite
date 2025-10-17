@@ -29,16 +29,18 @@
 			%-->
 			<br>
 			<div class="rcontent-flex" style="display: flex; justify-content: center;">
-				<textarea id="circ-text" style="overflow-y: hidden; width: 80%; max-width: 100%; min-width: 20%; height: 80px; font-size: 1rem;">1 2 u0 3, 2 3 r1 2, 3 1 r3 1+i</textarea><br>
+				<textarea id="circ-text" style="overflow-y: hidden; width: 80%; max-width: 100%; min-width: 20%; height: 80px;">1 2 u0 3, 2 3 r1 2, 3 1 r3 1+i</textarea><br>
 			</div>
 		</p>
 		<p>
-			<button id="calc" style="font-size: 1rem;">
-				<!--%c
-					SSR_EN_PRINTF("Let's go");
-					SSR_RU_PRINTF("Погнали");
-				%-->
-			</button>
+			<div style="display: flex; justify-content: center;">
+				<button id="calc">
+					<!--%c
+						SSR_EN_PRINTF("Let's go");
+						SSR_RU_PRINTF("Погнали");
+					%-->
+				</button>
+			</div>
 		</p>
 		<p>
 			<em id="error-field"></em>
