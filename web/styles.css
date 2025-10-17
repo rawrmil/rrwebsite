@@ -11,9 +11,9 @@ body { margin: 0; }
   --shadow-s: inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
   --shadow-m: inset 0 1px 2px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015; 
   --shadow-l: inset 0 1px 2px #ffffff70, 0 4px 6px #00000030, 0 6px 10px #00000015;
-	--shadow-s-in: inset 0 -1px 2px #ffffff30, 0 -1px 2px #00000030, 0 -2px 4px #00000015;
-	--shadow-m-in: inset 0 -1px 2px #ffffff50, 0 -2px 4px #00000030, 0 -4px 8px #00000015; 
-	--shadow-l-in: inset 0 -1px 2px #ffffff70, 0 -4px 6px #00000030, 0 -6px 10px #00000015;
+	--shadow-s-in: inset 0 -1px 1px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
+	--shadow-m-in: inset 0 -1px 1px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015; 
+	--shadow-l-in: inset 0 -1px 1px #ffffff70, 0 4px 6px #00000030, 0 6px 10px #00000015;
 	--gradient-bg: linear-gradient(0deg, var(--bg), var(--bg-light));
 	--gradient-bg-h: linear-gradient(-90deg, var(--bg), var(--bg-light));
 	--shadow-text-s: 0.07rem 0.07rem 0.0rem var(--bg-light);
@@ -133,13 +133,13 @@ footer {
 }
 /* --- CONTENT --- */
 .rbox {
-	padding: 24px 1.25rem 32px 1.25rem;
 	width: clamp(50%, 600px, 85%);
 	height: 100%;
 	font-family: NotoSans;
 	font-size: 32px;
 	line-height: 1.6;
 	margin: 10px;
+	padding: 0 1.25rem 32px 1.25rem;
 	border-radius: 15px;
 	background-color: var(--bg);
 	box-shadow: var(--shadow-s);
@@ -147,7 +147,7 @@ footer {
 	width: clamp(50%, 600px, 85%);
 	height: 100%;
 	font-family: NotoSans;
-	font-size: 32px;
+	font-size: 1rem;
 	line-height: 1.6;
 	margin: 10px;
 }
@@ -197,6 +197,7 @@ footer {
 }
 .rbox button:active {
 	box-shadow: var(--shadow-s-in);
+	transform: scale(0.98);
 }
 /* --- Textarea --- */
 .rbox textarea {
@@ -204,12 +205,12 @@ footer {
 	padding: 0.2rem 0.5rem;
 	color: var(--text);
 	background: var(--bg-light);	
-	box-shadow: var(--shadow-s);
+	box-shadow: var(--shadow-s-in);
 	border: none;
 	border-radius: 3px;
 	transition: var(--ease);
 }
 .rbox textarea:focus {
 	outline: none;
-	box-shadow: var(--shadow-s-in);
+	box-shadow: var(--shadow-m-in);
 }
