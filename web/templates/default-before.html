@@ -4,6 +4,22 @@
 		<title>rawr</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<!--%c
+			SSR_PRINTF("<style>");
+			switch (ssr_data.theme_is_light) {
+				case -1:
+					SSR_PRINTF("@import url(\"light.css\") (prefers-color-scheme: light);");
+					SSR_PRINTF("@import url(\"dark.css\") (prefers-color-scheme: dark);");
+					break;
+				case 0:
+					SSR_PRINTF("@import url(\"dark.css\");");
+					break;
+				case +1:
+					SSR_PRINTF("@import url(\"light.css\");");
+					break;
+			}
+			SSR_PRINTF("</style>");
+		%-->
 		<link rel="stylesheet" href="/res/fonts/Libertinus-Serif/import.css">
 		<link rel="stylesheet" href="/res/fonts/Noto-Sans/import.css">
 		<link rel="stylesheet" href="/styles.css">

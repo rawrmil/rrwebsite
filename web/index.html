@@ -10,16 +10,23 @@
 		width: 100vw;
 		min-height: 100vh;
 		background: url("res/images/background2.webp") no-repeat center/cover black;
-		box-shadow: inset 0 0 0 100vmax rgba(255,255,255,0.45);
 		padding: 64px 24px 48px 24px;
 		box-sizing: border-box; /* No shrinking */
 		overflow: hidden;
 	}
-	@media (prefers-color-scheme: dark) {
-	.rr-welcome-pane {
-		box-shadow: inset 0 0 0 100vmax rgba(0,0,0,0.65);
-	}
-	}
+	<!--%c
+		if (ssr_data.theme_is_light == -1) SSR_PRINTF("@media (preferred-color-scheme: light) {");
+		SSR_PRINTF(".rr-welcome-pane {");
+		if (ssr_data.theme_is_light == 1) {
+			SSR_PRINTF("box-shadow: inset 0 0 0 100vmax rgba(255,255,255,0.45);");
+		}
+		if (ssr_data.theme_is_light == 0) {
+			SSR_PRINTF("@media (preferred-color-scheme: light) {");
+			SSR_PRINTF("box-shadow: inset 0 0 0 100vmax rgba(0,0,0,0.65);");
+		}
+		SSR_PRINTF("}");
+		if (ssr_data.theme_is_light == -1) SSR_PRINTF("}");
+	%-->
 	.rwelcome {
 		display: block;
 		color: var(--text);

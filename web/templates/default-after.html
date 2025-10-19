@@ -1,4 +1,16 @@
 		<footer>
+			<span class="rr-footer-theme">
+				<!--%c
+					if (ssr_data.is_theme_light == 1) {
+						SSR_EN_PRINTF("<a href=\"?theme=light\">Light</a>");
+						SSR_RU_PRINTF("<a href=\"?theme=light\">Светлая</a>");
+					} else {
+						SSR_RU_PRINTF("<a href=\"?theme=dark\">Тёмная</a>");
+						SSR_EN_PRINTF("<a href=\"?theme=dark\">Dark</a>");
+					{
+				%-->
+			</span>
+			•
 			<span class="rr-footer-language">
 				<!--%c
 					SSR_EN_PRINTF("<a href=\"?lang=ru\">Русский</a>");

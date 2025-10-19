@@ -32,6 +32,7 @@ size_t active_conns = 0;
 typedef struct SSRData {
 	struct mg_http_message* hm;
 	char lang_is_ru;
+	char theme_is_light; // undef, dark, light - -1, 0, +1
 	size_t active_conns;
 } SSRData;
 
@@ -228,6 +229,15 @@ char HTTPIsLangRu(struct mg_http_message* hm) {
 	return 0;
 }
 
+char HTTPIsThemeLight(struct mg_http_message* hm) {
+	struct mg_str var_lang = mg_http_var(hm->query, mg_str("theme"));
+	if (var_lang.len == 5 && strncmp("light", var_lang.buf, 5) == 0)
+		return 1;
+	if (var_lang.len == 4 && strncmp("dark", var_lang.buf, 4) == 0)
+		return 0;
+	return -1;
+}
+
 Visitor* HTTPAddPendingVisitor(Nob_String_Builder* resp_headers) {
 	Visitor* visitor = VisitorsAddPending(&visitors);
 	if (visitor == NULL) return NULL;
@@ -263,6 +273,8 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		SSRData ssr_data = {0};
 		ssr_data.hm = hm;
 		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
+		ssr_data.theme_is_light = HTTPIsThemeLight(hm);
+		MG_INFO(("ssr_data.theme_is_light: %d", ssr_data.theme_is_light));
 		ssr_data.active_conns = active_conns;
 
 		nob_da_reserve(&sb, 8192);
