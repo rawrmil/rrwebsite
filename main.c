@@ -74,13 +74,13 @@ void a_parse_flags(int argc, char** argv) {
 	char** f_web_dir = flag_str("webdir", "./web", "directory for the server");
 
 	if (!flag_parse(argc, argv)) {
-    flag_print_options(stderr);
+    flag_print_options(stdout);
 		flag_print_error(stderr);
 		exit(1);
 	}
 
 	if (*f_help) {
-    flag_print_options(stderr);
+    flag_print_options(stdout);
 		exit(0);
 	}
 
