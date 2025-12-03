@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
 	//	if (!cmd_run(&cmd)) return 0;
 	//}
 
+	nob_mkdir_if_not_exists("ssr_generated");
 	SSRConvert("web/index.html", "ssr_generated/ssr_root.h", "ssr_root");
 	SSRConvert("web/about.html", "ssr_generated/ssr_about.h", "ssr_about");
 	SSRConvert("web/page404.html", "ssr_generated/ssr_page404.h", "ssr_page404");
