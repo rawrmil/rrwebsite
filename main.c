@@ -12,6 +12,15 @@
 
 #define NOB_IMPLEMENTATION
 #include "nob.h"
+#undef NOB_IMPLEMENTATION
+
+#define ENUMS_IMPLEMENTATION
+#include "enums.h"
+#undef ENUMS_IMPLEMENTATION
+
+#define BINARY_RW_IMPLEMENTATION
+#include "binary_rw.h"
+#undef BINARY_RW_IMPLEMENTATION
 
 // --- UTILS ---
 
@@ -57,6 +66,7 @@ typedef struct SSRData {
 #include "ssr_generated/ssr_about.h"
 #include "ssr_generated/ssr_page404.h"
 #include "ssr_generated/ssr_proj_mna.h"
+#include "ssr_generated/ssr_proj_askme.h"
 
 // --- APP ---
 
@@ -213,6 +223,7 @@ SSRFuncPtr HTTPServePage(struct mg_connection* c, struct mg_http_message* hm) {
 	SSR_MATCH("/home", ssr_root);
 	SSR_MATCH("/about", ssr_about);
 	SSR_MATCH("/mna", ssr_proj_mna);
+	SSR_MATCH("/askme", ssr_proj_askme);
 	for (size_t i = 0; i < hm->uri.len; i++)
 		if (hm->uri.buf[i] == '.') return NULL;
 	return ssr_page404;
@@ -242,6 +253,11 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 
+	if (mg_strcmp(hm->uri, mg_str("/ws")) == 0) {
+		mg_ws_upgrade(c, hm, NULL);
+		return;
+	}
+
 	Nob_String_Builder sb = {0};
 	Nob_String_Builder resp_headers = {0};
 
@@ -252,8 +268,13 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 	}
 
 	if (!strncmp(hm->method.buf, "GET", 3)) {
-		SSRFuncPtr ssr_func_ptr = HTTPServePage(c, hm);
 
+		if (mg_strcmp(hm->uri, mg_str("/enums.js")) == 0) {
+			mg_http_reply(c, 200, "", enums_js.items);
+			return;
+		}
+
+		SSRFuncPtr ssr_func_ptr = HTTPServePage(c, hm);
 		if (!ssr_func_ptr) {
 			struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir };
 			mg_http_serve_dir(c, hm, &opts);
@@ -279,8 +300,30 @@ cleanup:
 	nob_sb_free(sb);
 }
 
+void HandleWSMessage(struct mg_connection* c, void* ev_data) {
+	struct mg_ws_message* wm = (struct mg_ws_message*)ev_data;
+	BReader br = {0};
+	br.count = wm->data.len;
+	br.data = wm->data.buf;
+	uint16_t gcmt;
+	mg_hexdump(br.data, br.count);
+	if (!BReadU16(&br, &gcmt)) { return; }
+	switch (gcmt) {
+		case CME_ASKME_QUESTION:
+			uint64_t nanos = nob_nanos_since_unspecified_epoch();
+			printf("nanos=%lu\n", nanos);
+			if (br.count > 256) { return; }
+			nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br.data + br.i, br.count - br.i);
+			nob_temp_reset();
+			break;
+	}
+}
+
 void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 	switch (ev) {
+		case MG_EV_WS_MSG:
+			HandleWSMessage(c, ev_data);
+			break;
 		case MG_EV_HTTP_MSG:
 			HandleHTTPMessage(c, ev_data);
 			break;
@@ -297,6 +340,10 @@ char is_working = 1;
 void app_terminate(int sig) { is_working = 0; }
 
 int main(int argc, char* argv[]) {
+	EnumsGenerateJS();
+	nob_mkdir_if_not_exists("dbs");
+	nob_mkdir_if_not_exists("dbs/askme");
+
 	a_parse_flags(argc, argv);
 
 	printf("log_level: %d\n", mg_log_level);
