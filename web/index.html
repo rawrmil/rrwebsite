@@ -163,6 +163,12 @@
 						SSR_RU_PRINTF("Исходный код сайта");
 					%-->
 				</a>
+				<a href='<!--%c SSR_PRINT_LINK("/askme"); %-->'>
+					<!--%c
+						SSR_EN_PRINTF("Anonymous question");
+						SSR_RU_PRINTF("Анонимный вопрос");
+					%-->
+				</a>
 				<a href='<!--%c SSR_PRINT_LINK("/mna"); %-->'>
 					<!--%c
 						SSR_EN_PRINTF("Modified nodal analysis (MNA)");

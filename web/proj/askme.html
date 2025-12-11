@@ -1,0 +1,26 @@
+<!--%c ssr_template_default_before(ssr_sb, ssr_data); %-->
+
+<div class="rcontent">
+	<div class="rbox">
+		<input id="askme_question" type="text" autocomplete="off" placeholder="Username"></input>
+		<button id="askme_send" onclick="SendAskmeQuestion()">Send</button>
+	</div>
+</div>
+<script src="enums.js"></script> <!-- Generated -->
+<script src="utils/binary_rw.js"></script>
+<script>
+	const askme_qustion_el = document.getElementById("askme_question");
+	function SendAskmeQuestion() {
+		const writer = new ByteWriter();
+		writer.u16(CME.ASKME_QUESTION);
+		writer.str(askme_qustion_el.value);
+		ws.send(writer.bytes())
+	}
+	// --- WebSockets ---
+	const ws = new WebSocket(`ws://${location.host}/ws`);
+	ws.binaryType = "arraybuffer";
+	ws.onopen = () => { console.log('WS: open'); };
+	ws.onmessage = (event) => {}
+</script>
+
+<!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->
