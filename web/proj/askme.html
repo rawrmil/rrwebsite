@@ -73,6 +73,12 @@
 		var msg_type = reader.u8();
 		if (msg_type == SME.ASKME_RESPONCE) { HandleAskmeResponce(reader); }
 	}
+	ws.onclose = (err) => {
+		askme_result.innerHTML = `
+			<!--%c SSR_RU_PRINTF("Ошибка. Не удалось подключится к серверу по веб-сокетам! Попробуй другое устройство или проверь настройки браузера."); %-->
+			<!--%c SSR_EN_PRINTF("Error. Failed to connect to the server over web sockets! Try another device or check browser settings."); %-->
+		`;
+	};
 </script>
 
 <!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->
