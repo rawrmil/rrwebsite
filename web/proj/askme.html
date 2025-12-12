@@ -35,16 +35,28 @@
 	}
 	function HandleAskmeResponce(reader) {
 		var success = reader.u8();
+		switch (success) {
+			case 0:
+				askme_result.innerHTML = `
+					<!--%c SSR_RU_PRINTF("Вопрос успешно отправлен."); %-->
+					<!--%c SSR_EN_PRINTF("Question sent successefuly."); %-->
+				`;
+				break;
+			case 1:
+				askme_result.innerHTML = `
+					<!--%c SSR_RU_PRINTF("Ошибка. Вопрос слишком длинный!"); %-->
+					<!--%c SSR_EN_PRINTF("Error. Question is too long!"); %-->
+				`;
+				break;
+			case 2: 
+				askme_result.innerHTML = `
+					<!--%c SSR_RU_PRINTF("Ошибка. Вопрос пустой!"); %-->
+					<!--%c SSR_EN_PRINTF("Error. Question empty!"); %-->
+				`;
+				break;
+		}
 		if (success) {
-			askme_result.innerHTML = `
-				<!--%c SSR_RU_PRINTF("Вопрос успешно отправлен."); %-->
-				<!--%c SSR_EN_PRINTF("Question sent successefuly."); %-->
-			`;
 		} else {
-			askme_result.innerHTML = `
-				<!--%c SSR_RU_PRINTF("Ошибка. Вероятно вопрос слишком длинный."); %-->
-				<!--%c SSR_EN_PRINTF("Error. Possibly question is too long."); %-->
-			`;
 		}
 	}
 	// --- WebSockets ---
