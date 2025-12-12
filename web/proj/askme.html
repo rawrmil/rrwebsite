@@ -63,7 +63,9 @@
 		}
 	}
 	// --- WebSockets ---
-	const ws = new WebSocket(`ws://${location.host}/ws`);
+	const ws_proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	const ws = new WebSocket(`${ws_proto}//${window.location.host}/ws`);
+	//const ws = new WebSocket(`ws://${location.host}/ws`);
 	ws.binaryType = "arraybuffer";
 	ws.onopen = () => { console.log('WS: open'); };
 	ws.onmessage = (event) => {
