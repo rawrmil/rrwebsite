@@ -8,7 +8,6 @@
 typedef struct BReader {
 	const char *data;
 	size_t count;
-	size_t i;
 } BReader;
 
 enum {
@@ -51,10 +50,11 @@ void BWriterFree(BWriter bw);
 
 #define BR_READ_OUT(type_, amount_) \
 	do { \
-		if (br->i + amount_ > br->count) \
+		if (amount_ > br->count) \
 			return false; \
-		memcpy(out, &br->data[br->i], amount_); \
-		br->i += amount_; \
+		memcpy(out, br->data, amount_); \
+		br->data += amount_; \
+		br->count -= amount_; \
 		return true; \
 	} while(0);
 

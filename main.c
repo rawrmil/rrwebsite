@@ -304,8 +304,8 @@ void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	char result = 0;
 	uint64_t nanos = nob_nanos_since_unspecified_epoch();
 	if (br->count > 256) { nob_return_defer(1); }
-	if (br->count - br->i == 0) { nob_return_defer(2); }
-	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data + br->i, br->count - br->i);
+	if (br->count == 0) { nob_return_defer(2); }
+	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
 	nob_temp_reset();
 defer:
 	bw_temp.count = 0;
