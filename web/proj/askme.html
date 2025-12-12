@@ -4,23 +4,43 @@
 	<div class="rbox">
 		<input id="askme_question" type="text" autocomplete="off" placeholder="Username"></input>
 		<button id="askme_send" onclick="SendAskmeQuestion()">Send</button>
+		<p id="askme_result"></p>
 	</div>
 </div>
 <script src="enums.js"></script> <!-- Generated -->
 <script src="utils/binary_rw.js"></script>
 <script>
 	const askme_qustion_el = document.getElementById("askme_question");
+	const askme_result_el = document.getElementById("askme_question");
 	function SendAskmeQuestion() {
 		const writer = new ByteWriter();
 		writer.u16(CME.ASKME_QUESTION);
 		writer.str(askme_qustion_el.value);
 		ws.send(writer.bytes())
 	}
+	function HandleAskmeResponce(reader) {
+		var success = reader.u8();
+		if (success) {
+			askme_result.innerHTML = `
+				<!--%c SSR_RU_PRINTF("Вопрос успешно отправлен."); %-->
+				<!--%c SSR_EN_PRINTF("Question sent successefuly."); %-->
+			`;
+		} else {
+			askme_result.innerHTML = `
+				<!--%c SSR_RU_PRINTF("Ошибка. Вероятно вопрос слишком длинный."); %-->
+				<!--%c SSR_EN_PRINTF("Error. Possibly question is too long."); %-->
+			`;
+		}
+	}
 	// --- WebSockets ---
 	const ws = new WebSocket(`ws://${location.host}/ws`);
 	ws.binaryType = "arraybuffer";
 	ws.onopen = () => { console.log('WS: open'); };
-	ws.onmessage = (event) => {}
+	ws.onmessage = (event) => {
+		const reader = new ByteReader(event.data);
+		var msg_type = reader.u8();
+		if (msg_type == SME.ASKME_RESPONCE) { HandleAskmeResponce(reader); }
+	}
 </script>
 
 <!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->

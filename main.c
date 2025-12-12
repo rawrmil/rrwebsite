@@ -300,21 +300,29 @@ cleanup:
 	nob_sb_free(sb);
 }
 
+void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
+	bool result = true;
+	uint64_t nanos = nob_nanos_since_unspecified_epoch();
+	if (br->count > 256) { nob_return_defer(false); }
+	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data + br->i, br->count - br->i);
+	nob_temp_reset();
+defer:
+	bw_temp.count = 0;
+	BWriterAppend(&bw_temp, BU8, SME_ASKME_RESPONCE, BU8, result);
+	mg_ws_send(c, bw_temp.items, bw_temp.count, WEBSOCKET_OP_BINARY);
+}
+
 void HandleWSMessage(struct mg_connection* c, void* ev_data) {
 	struct mg_ws_message* wm = (struct mg_ws_message*)ev_data;
 	BReader br = {0};
 	br.count = wm->data.len;
 	br.data = wm->data.buf;
 	uint16_t gcmt;
-	mg_hexdump(br.data, br.count);
+	//mg_hexdump(br.data, br.count);
 	if (!BReadU16(&br, &gcmt)) { return; }
 	switch (gcmt) {
 		case CME_ASKME_QUESTION:
-			uint64_t nanos = nob_nanos_since_unspecified_epoch();
-			printf("nanos=%lu\n", nanos);
-			if (br.count > 256) { return; }
-			nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br.data + br.i, br.count - br.i);
-			nob_temp_reset();
+			HandleAskmeQuestion(c, &br);
 			break;
 	}
 }
