@@ -48,15 +48,18 @@
 					<!--%c SSR_EN_PRINTF("Error. Question is too long!"); %-->
 				`;
 				break;
-			case 2: 
+			case 2:
 				askme_result.innerHTML = `
 					<!--%c SSR_RU_PRINTF("Ошибка. Вопрос пустой!"); %-->
 					<!--%c SSR_EN_PRINTF("Error. Question empty!"); %-->
 				`;
 				break;
-		}
-		if (success) {
-		} else {
+			case 3:
+				askme_result.innerHTML = `
+					<!--%c SSR_RU_PRINTF("Ошибка. Слишком часто отправляешь!"); %-->
+					<!--%c SSR_EN_PRINTF("Error. Sending too frequently!"); %-->
+				`;
+				break;
 		}
 	}
 	// --- WebSockets ---

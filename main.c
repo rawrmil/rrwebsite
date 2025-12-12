@@ -172,11 +172,25 @@ cleanup:
 	nob_sb_free(sb);
 }
 
+typedef struct ConnData {
+	uint64_t last_msg_nanos;
+} ConnData;
+
+bool ConnCooldown(struct mg_connection* c) {
+	ConnData* cd = (ConnData*)c->fn_data;
+	uint64_t curr_sec = nob_nanos_since_unspecified_epoch() / NOB_NANOS_PER_SEC;
+	uint64_t last_sec = cd->last_msg_nanos / NOB_NANOS_PER_SEC;
+	bool result = curr_sec > last_sec + 10.0;
+	if (result) { cd->last_msg_nanos = nob_nanos_since_unspecified_epoch(); }
+	return result;
+}
+
 void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	char result = 0;
 	uint64_t nanos = nob_nanos_since_unspecified_epoch();
 	if (br->count > 256) { nob_return_defer(1); }
 	if (br->count == 0) { nob_return_defer(2); }
+	if (!ConnCooldown(c)) { nob_return_defer(3); }
 	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
 	nob_temp_reset();
 defer:
@@ -203,6 +217,8 @@ void HandleWSMessage(struct mg_connection* c, void* ev_data) {
 void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 	switch (ev) {
 		case MG_EV_WS_MSG:
+			if (!c->fn_data) { c->fn_data = calloc(1, sizeof(ConnData)); }
+			NOB_ASSERT(c->fn_data);
 			HandleWSMessage(c, ev_data);
 			break;
 		case MG_EV_HTTP_MSG:
@@ -210,6 +226,9 @@ void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 			break;
 		case MG_EV_POLL:
 			VisitorsManageUnactive();
+			break;
+		case MG_EV_CLOSE:
+			free(c->fn_data);
 			break;
 	}
 }
