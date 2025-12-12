@@ -13,8 +13,20 @@
 enum { CME };
 #undef X
 
+// --- Server Message Enum (SME) ---
+
+#define SME \
+	X(SME_ASKME_RESPONCE) \
+	X(SME_LENGTH) \
+
+#define X(name_) name_,
+enum { SME };
+#undef X
+
 // --- Names ---
+
 extern const char *CME_NAMES[];
+extern const char *SME_NAMES[];
 
 // --- JS ---
 
@@ -30,6 +42,10 @@ void GameMessageTypesGenerateJS();
 const char *CME_NAMES[] = { CME };
 #undef X
 
+#define X(name_) #name_,
+const char *SME_NAMES[] = { SME };
+#undef X
+
 Nob_String_Builder enums_js;
 
 #define JS_ENUM_GENERATE(name_) \
@@ -43,6 +59,7 @@ Nob_String_Builder enums_js;
 
 void EnumsGenerateJS() {
 	JS_ENUM_GENERATE(CME);
+	JS_ENUM_GENERATE(SME);
 	//nob_sb_appendf(&enums_js, "const debug = %s;\n", game.debug ? "true" : "false"); // TODO: by flag
 	nob_sb_append_null(&enums_js);
 }
