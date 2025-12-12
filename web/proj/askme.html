@@ -2,20 +2,35 @@
 
 <div class="rcontent">
 	<div class="rbox">
-		<input id="askme_question" type="text" autocomplete="off" placeholder="Username"></input>
-		<button id="askme_send" onclick="SendAskmeQuestion()">Send</button>
+		<h2>
+			<!--%c
+				SSR_EN_PRINTF("Ask me, bro");
+				SSR_RU_PRINTF("Задай вопрос, бро");
+			%-->
+		</h2>
+		<div style="display: flex; justify-content: center; gap: 10px;">
+			<input id="askme_question" type="text" autocomplete="off" placeholder='<!--%cSSR_EN_PRINTF("Question text"); SSR_RU_PRINTF("Текст вопроса");%-->'></input>
+			<button id="askme_send_btn" onclick="SendAskmeQuestion()">Send</button>
+		</div>
 		<p id="askme_result"></p>
 	</div>
 </div>
 <script src="enums.js"></script> <!-- Generated -->
 <script src="utils/binary_rw.js"></script>
 <script>
-	const askme_qustion_el = document.getElementById("askme_question");
+	const askme_question_el = document.getElementById("askme_question");
 	const askme_result_el = document.getElementById("askme_question");
+	const askme_send_btn_el = document.getElementById("askme_send_btn");
+	askme_question_el.addEventListener("keydown", function(event) {
+		if (event.key === "Enter") {
+			event.preventDefault();
+			askme_send_btn_el.click();
+		}
+	});
 	function SendAskmeQuestion() {
 		const writer = new ByteWriter();
 		writer.u16(CME.ASKME_QUESTION);
-		writer.str(askme_qustion_el.value);
+		writer.str(askme_question_el.value);
 		ws.send(writer.bytes())
 	}
 	function HandleAskmeResponce(reader) {
