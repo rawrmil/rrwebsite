@@ -1,10 +1,10 @@
-#ifdef TELEGRAM_API_TOKEN
+#ifdef TGBOT_ENABLE
 
 #ifndef TGBOT_RW_H
 #define TGBOT_RW_H
 
-#define TELEGRAM_API_HOST "api.telegram.org"
-#define TELEGRAM_API_URL "https://"TELEGRAM_API_HOST"/"
+#define TGBOT_API_HOST "api.telegram.org"
+#define TGBOT_API_URL "https://"TGBOT_API_HOST"/"
 
 void TGBotEventHandler(struct mg_connection* c, int ev, void* ev_data);
 struct mg_connection* TGBotConnect(struct mg_mgr* mgr);
@@ -19,13 +19,13 @@ extern uint64_t tgb_last_poll_ms;
 uint64_t tgb_last_poll_ms;
 
 struct mg_connection* TGBotConnect(struct mg_mgr* mgr) {
-	return mg_http_connect(mgr, TELEGRAM_API_URL, TGBotEventHandler, NULL);
+	return mg_http_connect(mgr, TGBOT_API_URL, TGBotEventHandler, NULL);
 }
 
 void TGBotRequest(struct mg_connection* c, char* method) {
 	mg_printf(c,
-			"GET /bot"TELEGRAM_API_TOKEN"/%s HTTP/1.1\r\n"
-			"Host: "TELEGRAM_API_HOST"\r\n"
+			"GET /bot"TGBOT_API_TOKEN"/%s HTTP/1.1\r\n"
+			"Host: "TGBOT_API_HOST"\r\n"
 			"Connection: keep-alive\r\n"
 			"\r\n", method);
 }
@@ -63,4 +63,4 @@ void TGBotEventHandler(struct mg_connection* c, int ev, void* ev_data) {
 }
 
 #endif /* TGBOT_IMPLEMENTATION */
-#endif /* TELEGRAM_API_TOKEN */
+#endif /* TGBOT_ENABLE */
