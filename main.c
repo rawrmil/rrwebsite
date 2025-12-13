@@ -23,7 +23,7 @@
 #include "binary_rw.h"
 #undef BINARY_RW_IMPLEMENTATION
 
-#include "credentials.h"
+#include "credentials.h" /* Created by user */
 
 #define TGBOT_IMPLEMENTATION
 #include "tgbot.h"
@@ -264,9 +264,9 @@ int main(int argc, char* argv[]) {
 	snprintf(addrstr, sizeof(addrstr), "http://0.0.0.0:%d", aconf.port);
 	mg_http_listen(&mgr, addrstr, EventHandler, NULL);
 
-#ifdef TELEGRAM_API_TOKEN
+#ifdef TGBOT_ENABLE
 	struct mg_connection* tgbot_conn = TGBotConnect(&mgr);
-#endif /* TELEGRAM_API_TOKEN */
+#endif /* TGBOT_ENABLE */
 
 	signal(SIGINT, app_terminate);
 	signal(SIGTERM, app_terminate);
@@ -274,15 +274,9 @@ int main(int argc, char* argv[]) {
 	int count = 0;
 	while (is_working) {
 		mg_mgr_poll(&mgr, 1000);
-#ifdef TELEGRAM_API_TOKEN
+#ifdef TGBOT_ENABLE
 		TGBotPoll(tgbot_conn);
-		uint64_t now = mg_millis();
-		if (now - tgb_last_poll_ms > 2000) {
-			MG_INFO(("TGBOT: POLL\n"));
-			TGBotRequest(tgbot_conn, "getUpdates");
-			tgb_last_poll_ms = now;
-		}
-#endif /* TELEGRAM_API_TOKEN */
+#endif /* TGBOT_ENABLE */
 	}
 
 	// Closing
