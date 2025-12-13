@@ -192,6 +192,29 @@ bool ConnCooldown(struct mg_connection* c) {
 	return result;
 }
 
+// TODO: use JSON library
+void json_escape_append(Nob_String_Builder* sb, const char* str, size_t len) {
+	for (size_t i = 0; i < len; i++) {
+		char c = str[i];
+		switch (c) {
+			case '"': nob_sb_appendf(sb, "\\\""); break;
+			case '\\': nob_sb_appendf(sb, "\\\\"); break;
+			case '\b': nob_sb_appendf(sb, "\\b"); break;
+			case '\f': nob_sb_appendf(sb, "\\f"); break;
+			case '\n': nob_sb_appendf(sb, "\\n"); break;
+			case '\r': nob_sb_appendf(sb, "\\r"); break;
+			case '\t': nob_sb_appendf(sb, "\\t"); break;
+			default:
+				// Control characters (0x00-0x1F) need Unicode escape
+				if ((unsigned char)c < 0x20) {
+					nob_sb_appendf(sb, "\\u%04x", (unsigned char)c);
+				} else {
+					nob_sb_appendf(sb, &c, 1);
+				}
+		}
+	}
+}
+
 void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	char result = 0;
 	uint64_t nanos = nob_nanos_since_unspecified_epoch();
@@ -199,6 +222,14 @@ void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	if (br->count == 0) { nob_return_defer(2); }
 	if (!ConnCooldown(c)) { nob_return_defer(3); }
 	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
+#ifdef TGBOT_ADMIN_CHAT_ID
+	Nob_String_Builder sb = {0};
+	nob_sb_appendf(&sb, "{\"chat_id\":\""TGBOT_ADMIN_CHAT_ID"\",\"text\":");
+	json_escape_append(&sb, br->data, br->count);
+	nob_sb_appendf(&sb, "\"}");
+	TGBotPost(tgb_conn, "sendMessage", "application/json", sb.items, sb.count);
+	nob_sb_free(sb);
+#endif /* TGBOT_ADMIN_CHAT_ID */
 	nob_temp_reset();
 defer:
 	bw_temp.count = 0;
@@ -265,7 +296,7 @@ int main(int argc, char* argv[]) {
 	mg_http_listen(&mgr, addrstr, EventHandler, NULL);
 
 #ifdef TGBOT_ENABLE
-	struct mg_connection* tgbot_conn = TGBotConnect(&mgr);
+	 TGBotConnect(&mgr);
 #endif /* TGBOT_ENABLE */
 
 	signal(SIGINT, app_terminate);
@@ -275,7 +306,7 @@ int main(int argc, char* argv[]) {
 	while (is_working) {
 		mg_mgr_poll(&mgr, 1000);
 #ifdef TGBOT_ENABLE
-		TGBotPoll(tgbot_conn);
+		TGBotPoll();
 #endif /* TGBOT_ENABLE */
 	}
 
