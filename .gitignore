@@ -1,4 +1,5 @@
 rrwebsite
+credentials.h
 out/
 web/res/
 ssr_generated/
