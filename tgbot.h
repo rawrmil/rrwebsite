@@ -42,7 +42,8 @@ void TGBotPost(struct mg_connection* c, char* action, char* content_type, char* 
 			"Content-Type: %s\r\n"
 			"Content-Length: %zu\r\n"
 			"\r\n"
-			"%*.s", action, content_type, len, len, buf);
+			"%.*s", action, content_type, len, (int)len, buf);
+	printf(">>>%s<<<\n", msg);
 	mg_send(c, msg, strlen(msg));
 	nob_temp_reset();
 }

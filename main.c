@@ -195,21 +195,20 @@ bool ConnCooldown(struct mg_connection* c) {
 // TODO: use JSON library
 void json_escape_append(Nob_String_Builder* sb, const char* str, size_t len) {
 	for (size_t i = 0; i < len; i++) {
-		char c = str[i];
+		uint8_t c = str[i];
 		switch (c) {
-			case '"': nob_sb_appendf(sb, "\\\""); break;
-			case '\\': nob_sb_appendf(sb, "\\\\"); break;
-			case '\b': nob_sb_appendf(sb, "\\b"); break;
-			case '\f': nob_sb_appendf(sb, "\\f"); break;
-			case '\n': nob_sb_appendf(sb, "\\n"); break;
-			case '\r': nob_sb_appendf(sb, "\\r"); break;
-			case '\t': nob_sb_appendf(sb, "\\t"); break;
+			case  '"': nob_sb_append_cstr(sb, "\\\""); break;
+			case '\\': nob_sb_append_cstr(sb, "\\\\"); break;
+			case '\b': nob_sb_append_cstr(sb, "\\b"); break;
+			case '\f': nob_sb_append_cstr(sb, "\\f"); break;
+			case '\n': nob_sb_append_cstr(sb, "\\n"); break;
+			case '\r': nob_sb_append_cstr(sb, "\\r"); break;
+			case '\t': nob_sb_append_cstr(sb, "\\t"); break;
 			default:
-				// Control characters (0x00-0x1F) need Unicode escape
-				if ((unsigned char)c < 0x20) {
-					nob_sb_appendf(sb, "\\u%04x", (unsigned char)c);
+				if (c < 0x20) {
+					nob_sb_appendf(sb, "\\u%04x", c);
 				} else {
-					nob_sb_appendf(sb, &c, 1);
+					nob_da_append(sb, c);
 				}
 		}
 	}
@@ -224,11 +223,16 @@ void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
 #ifdef TGBOT_ADMIN_CHAT_ID
 	Nob_String_Builder sb = {0};
-	nob_sb_appendf(&sb, "{\"chat_id\":\""TGBOT_ADMIN_CHAT_ID"\",\"text\":");
-	json_escape_append(&sb, br->data, br->count);
+	Nob_String_Builder tmp = {0};
+	nob_sb_appendf(&sb, "{\"chat_id\":\""TGBOT_ADMIN_CHAT_ID"\",\"text\":\"");
+	nob_sb_append_cstr(&tmp, "Anonymous question: \"");
+	nob_da_append_many(&tmp, br->data, br->count);
+	nob_sb_append_cstr(&tmp, "\"");
+	json_escape_append(&sb, tmp.items, tmp.count);
 	nob_sb_appendf(&sb, "\"}");
 	TGBotPost(tgb_conn, "sendMessage", "application/json", sb.items, sb.count);
 	nob_sb_free(sb);
+	nob_sb_free(tmp);
 #endif /* TGBOT_ADMIN_CHAT_ID */
 	nob_temp_reset();
 defer:
