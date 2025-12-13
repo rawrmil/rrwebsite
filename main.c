@@ -6,6 +6,7 @@
 
 #define FLAG_IMPLEMENTATION
 #include "flag.h"
+
 #include "mongoose/mongoose.h"
 
 #include "splashes.h"
@@ -21,6 +22,12 @@
 #define BINARY_RW_IMPLEMENTATION
 #include "binary_rw.h"
 #undef BINARY_RW_IMPLEMENTATION
+
+#include "credentials.h"
+
+#define TGBOT_IMPLEMENTATION
+#include "tgbot.h"
+#undef TGBOT_IMPLEMENTATION
 
 // --- UTILS ---
 
@@ -233,6 +240,7 @@ void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 	}
 }
 
+
 // --- MAIN ---
 
 char is_working = 1;
@@ -255,6 +263,10 @@ int main(int argc, char* argv[]) {
 	char addrstr[32];
 	snprintf(addrstr, sizeof(addrstr), "http://0.0.0.0:%d", aconf.port);
 	mg_http_listen(&mgr, addrstr, EventHandler, NULL);
+
+#ifdef TELEGRAM_API_TOKEN
+	TGBotConnect(&mgr);
+#endif /* TELEGRAM_API_TOKEN */
 
 	signal(SIGINT, app_terminate);
 	signal(SIGTERM, app_terminate);
