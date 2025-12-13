@@ -17,12 +17,12 @@ int main(int argc, char** argv) {
 
 	if (needs_rebuild1("lib/mongoose.o", "lib/mongoose/mongoose.c")) {
 		cmd_append(&cmd, CC, "-c", "lib/mongoose/mongoose.c", "-o", "lib/mongoose.o");
-		if (!cmd_run(&cmd)) return 0;
+		if (!cmd_run(&cmd)) return 1;
 	}
 
 	//if (needs_rebuild1("ssr_convert", "ssr_convert.c")) {
 	//	cmd_append(&cmd, CC, "ssr_convert.c", "-o", "ssr_convert");
-	//	if (!cmd_run(&cmd)) return 0;
+	//	if (!cmd_run(&cmd)) return 1;
 	//}
 
 	nob_mkdir_if_not_exists("ssr_generated");
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 	cmd_append(&cmd, CC, "main.c", "-o", "rrwebsite");
 	cmd_append(&cmd, "lib/mongoose.o");
 	cmd_append(&cmd, "-I./lib");
-	if (!cmd_run(&cmd)) return 0;
+	if (!cmd_run(&cmd)) return 1;
 
 	return 0;
 }
