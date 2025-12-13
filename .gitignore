@@ -1,5 +1,5 @@
 rrwebsite
-*.o
+out/
 web/res/
 ssr_generated/
 nob
