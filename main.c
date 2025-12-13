@@ -265,14 +265,24 @@ int main(int argc, char* argv[]) {
 	mg_http_listen(&mgr, addrstr, EventHandler, NULL);
 
 #ifdef TELEGRAM_API_TOKEN
-	TGBotConnect(&mgr);
+	struct mg_connection* tgbot_conn = TGBotConnect(&mgr);
 #endif /* TELEGRAM_API_TOKEN */
 
 	signal(SIGINT, app_terminate);
 	signal(SIGTERM, app_terminate);
 
+	int count = 0;
 	while (is_working) {
 		mg_mgr_poll(&mgr, 1000);
+#ifdef TELEGRAM_API_TOKEN
+		TGBotPoll(tgbot_conn);
+		uint64_t now = mg_millis();
+		if (now - tgb_last_poll_ms > 2000) {
+			MG_INFO(("TGBOT: POLL\n"));
+			TGBotRequest(tgbot_conn, "getUpdates");
+			tgb_last_poll_ms = now;
+		}
+#endif /* TELEGRAM_API_TOKEN */
 	}
 
 	// Closing
