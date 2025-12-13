@@ -15,8 +15,10 @@ int main(int argc, char** argv) {
 	
 	Cmd cmd = {0};
 
-	if (needs_rebuild1("lib/mongoose.o", "lib/mongoose/mongoose.c")) {
-		cmd_append(&cmd, CC, "-c", "lib/mongoose/mongoose.c", "-o", "lib/mongoose.o");
+	if (!nob_mkdir_if_not_exists("out")) return 1;
+
+	if (needs_rebuild1("out/mongoose.o", "lib/mongoose/mongoose.c")) {
+		cmd_append(&cmd, CC, "-c", "lib/mongoose/mongoose.c", "-o", "out/mongoose.o");
 		if (!cmd_run(&cmd)) return 1;
 	}
 
@@ -25,7 +27,7 @@ int main(int argc, char** argv) {
 	//	if (!cmd_run(&cmd)) return 1;
 	//}
 
-	nob_mkdir_if_not_exists("ssr_generated");
+	if (!nob_mkdir_if_not_exists("ssr_generated")) return 1;
 	SSRConvert("web/index.html", "ssr_generated/ssr_root.h", "ssr_root");
 	SSRConvert("web/about.html", "ssr_generated/ssr_about.h", "ssr_about");
 	SSRConvert("web/page404.html", "ssr_generated/ssr_page404.h", "ssr_page404");
@@ -34,8 +36,8 @@ int main(int argc, char** argv) {
 	SSRConvert("web/templates/default-after.html", "ssr_generated/ssr_template_default_after.h", "ssr_template_default_after");
 	SSRConvert("web/templates/default-before.html", "ssr_generated/ssr_template_default_before.h", "ssr_template_default_before");
 	
-	cmd_append(&cmd, CC, "main.c", "-o", "rrwebsite");
-	cmd_append(&cmd, "lib/mongoose.o");
+	cmd_append(&cmd, CC, "main.c", "-o", "out/rrwebsite");
+	cmd_append(&cmd, "out/mongoose.o");
 	cmd_append(&cmd, "-I./lib");
 	if (!cmd_run(&cmd)) return 1;
 
