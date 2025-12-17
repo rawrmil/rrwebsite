@@ -156,7 +156,13 @@ defer:
 	mg_send(c, sb.items, sb.count);
 }
 
+Nob_String_Builder http_page_string = {0};
+Nob_String_Builder http_headers_string = {0};
+
 void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
+
+	http_page_string.count = 0;
+	http_headers_string.count = 0;
 
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 
@@ -165,13 +171,10 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		return;
 	}
 
-	Nob_String_Builder sb = {0};
-	Nob_String_Builder resp_headers = {0};
-
 	Visitor* visitor = HTTPProcessVisitor(hm);
 	if (visitor == NULL) {
-		visitor = HTTPAddPendingVisitor(&resp_headers);
-		if (visitor == NULL) goto cleanup;
+		visitor = HTTPAddPendingVisitor(&http_headers_string);
+		if (visitor == NULL) { return; }
 	}
 
 	if (!strncmp(hm->method.buf, "POST", 4)) { // TODO: use mg_strcmp
@@ -179,7 +182,7 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 			BReader br = { .data=hm->body.buf, .count=hm->body.len };
 			uint16_t msg_type;
 			// TODO: fix reloading freeze
-			if (!BReadU16(&br, &msg_type)) { goto cleanup; }
+			if (!BReadU16(&br, &msg_type)) { return; }
 			switch (msg_type) {
 			case CME_ASKME_QUESTION:
 				HandleAskmeQuestion(c, &br);
@@ -187,7 +190,7 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 			default:
 				break;
 			}
-			goto cleanup;
+			return;
 		}
 	}
 
@@ -195,14 +198,14 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 		if (mg_strcmp(hm->uri, mg_str("/enums.js")) == 0) {
 			mg_http_reply(c, 200, "", enums_js.items);
-			return; // TODO: fix error
+			return;
 		}
 
 		SSRFuncPtr ssr_func_ptr = HTTPServePage(c, hm);
 		if (!ssr_func_ptr) {
 			struct mg_http_serve_opts opts = { .root_dir = aconf.web_dir };
 			mg_http_serve_dir(c, hm, &opts);
-			goto cleanup;
+			return;
 		}
 
 		SSRData ssr_data = {0};
@@ -210,18 +213,15 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		ssr_data.lang_is_ru = HTTPIsLangRu(hm);
 		ssr_data.active_conns = active_conns;
 
-		nob_da_reserve(&sb, 8192);
+		nob_da_reserve(&http_page_string, 8192);
 
-		(*ssr_func_ptr)(&sb, ssr_data);
+		(*ssr_func_ptr)(&http_page_string, ssr_data);
 
-		nob_da_append(&sb, '\0');
-		nob_da_append(&resp_headers, '\0');
+		nob_da_append(&http_page_string, '\0');
+		nob_da_append(&http_headers_string, '\0');
 
-		mg_http_reply(c, 200, resp_headers.items, sb.items);
+		mg_http_reply(c, 200, http_headers_string.items, http_page_string.items);
 	}
-cleanup:
-	nob_sb_free(resp_headers);
-	nob_sb_free(sb);
 }
 
 void HandleWSMessage(struct mg_connection* c, void* ev_data) {
@@ -291,6 +291,9 @@ int main(int argc, char* argv[]) {
 	// Closing
 	mg_mgr_free(&mgr);
 	printf("Server closed.\n");
+
+	nob_sb_free(http_page_string);
+	nob_sb_free(http_headers_string);
 
 	return 0;
 }
