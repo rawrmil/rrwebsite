@@ -143,17 +143,17 @@ void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
 	nob_temp_reset();
 defer:
-	Nob_String_Builder sb = {0};
 	bw_temp.count = 0;
-	// TODO: Ditch append
-	BWriterAppend(&bw_temp, BU8, result);
+	BWriteU8(&bw_temp, result);
+	Nob_String_Builder sb = {0};
 	nob_sb_appendf(&sb,
 			"HTTP/1.1 200 OK\r\n"
 			"Content-Length: %zu\r\n"
 			"Content-Type: application/octet-stream\r\n\r\n", bw_temp.count);
 	nob_da_append_many(&sb, bw_temp.items, bw_temp.count);
-	mg_hexdump(sb.items, sb.count);
+	//mg_hexdump(sb.items, sb.count);
 	mg_send(c, sb.items, sb.count);
+	nob_sb_free(sb);
 }
 
 Nob_String_Builder http_page_string = {0};
