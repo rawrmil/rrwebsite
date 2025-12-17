@@ -17,10 +17,6 @@ int main(int argc, char** argv) {
 
 	if (!nob_mkdir_if_not_exists("out")) return 1;
 
-	if (!nob_file_exists("credentials.h")) {
-		nob_write_entire_file("credentials.h", "", 0);
-	}
-
 	if (needs_rebuild1("out/mongoose.o", "lib/mongoose/mongoose.c")) {
 		cmd_append(&cmd, CC,
 				"-c",

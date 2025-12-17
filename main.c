@@ -25,10 +25,6 @@
 
 #include "credentials.h" /* Created by user */
 
-#define TGBOT_IMPLEMENTATION
-#include "tgbot.h"
-#undef TGBOT_IMPLEMENTATION
-
 // --- UTILS ---
 
 void RandomBytes(void *buf, size_t len) {
@@ -145,20 +141,6 @@ void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
 	if (br->count == 0) { nob_return_defer(2); }
 	//if (!ConnCooldown(c)) { nob_return_defer(3); } // TODO: IP timeout
 	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
-	// TODO: purge TGB & rewrite
-//#ifdef TGBOT_ADMIN_CHAT_ID
-//	Nob_String_Builder sb = {0};
-//	Nob_String_Builder tmp = {0};
-//	nob_sb_appendf(&sb, "{\"chat_id\":\""TGBOT_ADMIN_CHAT_ID"\",\"text\":\"");
-//	nob_sb_append_cstr(&tmp, "Anonymous question: \"");
-//	nob_da_append_many(&tmp, br->data, br->count);
-//	nob_sb_append_cstr(&tmp, "\"");
-//	json_escape_append(&sb, tmp.items, tmp.count);
-//	nob_sb_appendf(&sb, "\"}");
-//	TGBotPost(tgb_conn, "sendMessage", "application/json", sb.items, sb.count);
-//	nob_sb_free(sb);
-//	nob_sb_free(tmp);
-//#endif /* TGBOT_ADMIN_CHAT_ID */
 	nob_temp_reset();
 defer:
 	Nob_String_Builder sb = {0};
@@ -242,28 +224,6 @@ cleanup:
 	nob_sb_free(sb);
 }
 
-// TODO: use JSON library
-void json_escape_append(Nob_String_Builder* sb, const char* str, size_t len) {
-	for (size_t i = 0; i < len; i++) {
-		uint8_t c = str[i];
-		switch (c) {
-			case  '"': nob_sb_append_cstr(sb, "\\\""); break;
-			case '\\': nob_sb_append_cstr(sb, "\\\\"); break;
-			case '\b': nob_sb_append_cstr(sb, "\\b"); break;
-			case '\f': nob_sb_append_cstr(sb, "\\f"); break;
-			case '\n': nob_sb_append_cstr(sb, "\\n"); break;
-			case '\r': nob_sb_append_cstr(sb, "\\r"); break;
-			case '\t': nob_sb_append_cstr(sb, "\\t"); break;
-			default:
-				if (c < 0x20) {
-					nob_sb_appendf(sb, "\\u%04x", c);
-				} else {
-					nob_da_append(sb, c);
-				}
-		}
-	}
-}
-
 void HandleWSMessage(struct mg_connection* c, void* ev_data) {
 	struct mg_ws_message* wm = (struct mg_ws_message*)ev_data;
 	BReader br = {0};
@@ -320,19 +280,12 @@ int main(int argc, char* argv[]) {
 	snprintf(addrstr, sizeof(addrstr), "http://0.0.0.0:%d", aconf.port);
 	mg_http_listen(&mgr, addrstr, EventHandler, NULL);
 
-#ifdef TGBOT_ENABLE
-	 TGBotConnect(&mgr);
-#endif /* TGBOT_ENABLE */
-
 	signal(SIGINT, app_terminate);
 	signal(SIGTERM, app_terminate);
 
 	int count = 0;
 	while (is_working) {
 		mg_mgr_poll(&mgr, 1000);
-#ifdef TGBOT_ENABLE
-		TGBotPoll();
-#endif /* TGBOT_ENABLE */
 	}
 
 	// Closing
