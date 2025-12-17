@@ -31,14 +31,11 @@
 		const writer = new ByteWriter();
 		writer.u16(CME.ASKME_QUESTION);
 		writer.str(askme_question_el.value);
-		fetch('/binary', { method: 'POST', body: new Uint8Array(writer.arr) })
-			.then(resp => resp.arrayBuffer())
-			.then(buf => HandleAskmeServerResponse(buf));
+		ws.send(writer.bytes())
 	}
-	function HandleAskmeServerResponse(buf) {
-		const reader = new ByteReader(buf);
-		var code = reader.u8();
-		switch (code) {
+	function HandleAskmeResponce(reader) {
+		var success = reader.u8();
+		switch (success) {
 			case 0:
 				askme_result.innerHTML = `
 					<!--%c SSR_RU_PRINTF("Вопрос успешно отправлен."); %-->
@@ -65,6 +62,23 @@
 				break;
 		}
 	}
+	// --- WebSockets ---
+	const ws_proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	const ws = new WebSocket(`${ws_proto}//${window.location.host}/ws`);
+	//const ws = new WebSocket(`ws://${location.host}/ws`);
+	ws.binaryType = "arraybuffer";
+	ws.onopen = () => { console.log('WS: open'); };
+	ws.onmessage = (event) => {
+		const reader = new ByteReader(event.data);
+		var msg_type = reader.u8();
+		if (msg_type == SME.ASKME_RESPONCE) { HandleAskmeResponce(reader); }
+	}
+	ws.onclose = (err) => {
+		askme_result.innerHTML = `
+			<!--%c SSR_RU_PRINTF("Ошибка. Не удалось подключится к серверу по веб-сокетам! Попробуй другое устройство или проверь настройки браузера."); %-->
+			<!--%c SSR_EN_PRINTF("Error. Failed to connect to the server over web sockets! Try another device or check browser settings."); %-->
+		`;
+	};
 </script>
 
 <!--%c ssr_template_default_after(ssr_sb, ssr_data); %-->

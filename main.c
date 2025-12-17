@@ -128,6 +128,52 @@ char HTTPIsLangRu(struct mg_http_message* hm) {
 	return 0;
 }
 
+// TODO: find this thing purpose
+//bool ConnCooldown(struct mg_connection* c) {
+//	ConnData* cd = (ConnData*)c->fn_data;
+//	uint64_t curr_sec = nob_nanos_since_unspecified_epoch() / NOB_NANOS_PER_SEC;
+//	uint64_t last_sec = cd->last_msg_nanos / NOB_NANOS_PER_SEC;
+//	bool result = curr_sec > last_sec + 10.0;
+//	if (result) { cd->last_msg_nanos = nob_nanos_since_unspecified_epoch(); }
+//	return result;
+//}
+
+void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
+	char result = 0;
+	uint64_t nanos = nob_nanos_since_unspecified_epoch();
+	if (br->count > 256) { nob_return_defer(1); }
+	if (br->count == 0) { nob_return_defer(2); }
+	//if (!ConnCooldown(c)) { nob_return_defer(3); } // TODO: IP timeout
+	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
+	// TODO: purge TGB & rewrite
+//#ifdef TGBOT_ADMIN_CHAT_ID
+//	Nob_String_Builder sb = {0};
+//	Nob_String_Builder tmp = {0};
+//	nob_sb_appendf(&sb, "{\"chat_id\":\""TGBOT_ADMIN_CHAT_ID"\",\"text\":\"");
+//	nob_sb_append_cstr(&tmp, "Anonymous question: \"");
+//	nob_da_append_many(&tmp, br->data, br->count);
+//	nob_sb_append_cstr(&tmp, "\"");
+//	json_escape_append(&sb, tmp.items, tmp.count);
+//	nob_sb_appendf(&sb, "\"}");
+//	TGBotPost(tgb_conn, "sendMessage", "application/json", sb.items, sb.count);
+//	nob_sb_free(sb);
+//	nob_sb_free(tmp);
+//#endif /* TGBOT_ADMIN_CHAT_ID */
+	nob_temp_reset();
+defer:
+	Nob_String_Builder sb = {0};
+	bw_temp.count = 0;
+	// TODO: Ditch append
+	BWriterAppend(&bw_temp, BU8, result);
+	nob_sb_appendf(&sb,
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Length: %zu\r\n"
+			"Content-Type: application/octet-stream\r\n\r\n", bw_temp.count);
+	nob_da_append_many(&sb, bw_temp.items, bw_temp.count);
+	mg_hexdump(sb.items, sb.count);
+	mg_send(c, sb.items, sb.count);
+}
+
 void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
@@ -146,11 +192,28 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		if (visitor == NULL) goto cleanup;
 	}
 
+	if (!strncmp(hm->method.buf, "POST", 4)) { // TODO: use mg_strcmp
+		if (mg_strcmp(hm->uri, mg_str("/binary")) == 0) {
+			BReader br = { .data=hm->body.buf, .count=hm->body.len };
+			uint16_t msg_type;
+			// TODO: fix reloading freeze
+			if (!BReadU16(&br, &msg_type)) { goto cleanup; }
+			switch (msg_type) {
+			case CME_ASKME_QUESTION:
+				HandleAskmeQuestion(c, &br);
+				break;
+			default:
+				break;
+			}
+			goto cleanup;
+		}
+	}
+
 	if (!strncmp(hm->method.buf, "GET", 3)) {
 
 		if (mg_strcmp(hm->uri, mg_str("/enums.js")) == 0) {
 			mg_http_reply(c, 200, "", enums_js.items);
-			return;
+			return; // TODO: fix error
 		}
 
 		SSRFuncPtr ssr_func_ptr = HTTPServePage(c, hm);
@@ -179,19 +242,6 @@ cleanup:
 	nob_sb_free(sb);
 }
 
-typedef struct ConnData {
-	uint64_t last_msg_nanos;
-} ConnData;
-
-bool ConnCooldown(struct mg_connection* c) {
-	ConnData* cd = (ConnData*)c->fn_data;
-	uint64_t curr_sec = nob_nanos_since_unspecified_epoch() / NOB_NANOS_PER_SEC;
-	uint64_t last_sec = cd->last_msg_nanos / NOB_NANOS_PER_SEC;
-	bool result = curr_sec > last_sec + 10.0;
-	if (result) { cd->last_msg_nanos = nob_nanos_since_unspecified_epoch(); }
-	return result;
-}
-
 // TODO: use JSON library
 void json_escape_append(Nob_String_Builder* sb, const char* str, size_t len) {
 	for (size_t i = 0; i < len; i++) {
@@ -214,33 +264,6 @@ void json_escape_append(Nob_String_Builder* sb, const char* str, size_t len) {
 	}
 }
 
-void HandleAskmeQuestion(struct mg_connection* c, BReader* br) {
-	char result = 0;
-	uint64_t nanos = nob_nanos_since_unspecified_epoch();
-	if (br->count > 256) { nob_return_defer(1); }
-	if (br->count == 0) { nob_return_defer(2); }
-	if (!ConnCooldown(c)) { nob_return_defer(3); }
-	nob_write_entire_file(nob_temp_sprintf("dbs/askme/%lu", nanos), br->data, br->count);
-#ifdef TGBOT_ADMIN_CHAT_ID
-	Nob_String_Builder sb = {0};
-	Nob_String_Builder tmp = {0};
-	nob_sb_appendf(&sb, "{\"chat_id\":\""TGBOT_ADMIN_CHAT_ID"\",\"text\":\"");
-	nob_sb_append_cstr(&tmp, "Anonymous question: \"");
-	nob_da_append_many(&tmp, br->data, br->count);
-	nob_sb_append_cstr(&tmp, "\"");
-	json_escape_append(&sb, tmp.items, tmp.count);
-	nob_sb_appendf(&sb, "\"}");
-	TGBotPost(tgb_conn, "sendMessage", "application/json", sb.items, sb.count);
-	nob_sb_free(sb);
-	nob_sb_free(tmp);
-#endif /* TGBOT_ADMIN_CHAT_ID */
-	nob_temp_reset();
-defer:
-	bw_temp.count = 0;
-	BWriterAppend(&bw_temp, BU8, SME_ASKME_RESPONCE, BU8, result);
-	mg_ws_send(c, bw_temp.items, bw_temp.count, WEBSOCKET_OP_BINARY);
-}
-
 void HandleWSMessage(struct mg_connection* c, void* ev_data) {
 	struct mg_ws_message* wm = (struct mg_ws_message*)ev_data;
 	BReader br = {0};
@@ -251,7 +274,7 @@ void HandleWSMessage(struct mg_connection* c, void* ev_data) {
 	if (!BReadU16(&br, &gcmt)) { return; }
 	switch (gcmt) {
 		case CME_ASKME_QUESTION:
-			HandleAskmeQuestion(c, &br);
+			//HandleAskmeQuestion(c, &br);
 			break;
 	}
 }
@@ -259,7 +282,6 @@ void HandleWSMessage(struct mg_connection* c, void* ev_data) {
 void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 	switch (ev) {
 		case MG_EV_WS_MSG:
-			if (!c->fn_data) { c->fn_data = calloc(1, sizeof(ConnData)); }
 			NOB_ASSERT(c->fn_data);
 			HandleWSMessage(c, ev_data);
 			break;
@@ -270,7 +292,6 @@ void EventHandler(struct mg_connection* c, int ev, void* ev_data) {
 			VisitorsManageUnactive();
 			break;
 		case MG_EV_CLOSE:
-			free(c->fn_data);
 			break;
 	}
 }

@@ -16,7 +16,6 @@ enum { CME };
 // --- Server Message Enum (SME) ---
 
 #define SME \
-	X(SME_ASKME_RESPONCE) \
 	X(SME_LENGTH) \
 
 #define X(name_) name_,
