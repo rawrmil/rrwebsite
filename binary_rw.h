@@ -5,10 +5,7 @@
 
 #include "nob.h"
 
-typedef struct BReader {
-	const char *data;
-	size_t count;
-} BReader;
+typedef Nob_String_View BReader;
 
 enum {
 	BNULL,
@@ -27,11 +24,7 @@ bool BReadU64(BReader* br, uint64_t* out);
 bool BReadN(BReader* br, char* out, size_t n);
 Nob_String_Builder BReadSB(BReader* br, size_t n);
 
-typedef struct BWriter {
-	char*  items;
-	size_t count;
-	size_t capacity;
-} BWriter;
+typedef Nob_String_Builder BWriter;
 
 extern BWriter bw_temp;
 
