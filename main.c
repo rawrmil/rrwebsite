@@ -147,7 +147,7 @@ defer:
 	BWriteU8(&bw_temp, result);
 	Nob_String_Builder sb = {0};
 	nob_sb_appendf(&sb,
-			"HTTP/1.1 200 OK\r\n"
+			"HTTP/1.0 200 OK\r\n"
 			"Content-Length: %zu\r\n"
 			"Content-Type: application/octet-stream\r\n\r\n", bw_temp.count);
 	nob_da_append_many(&sb, bw_temp.items, bw_temp.count);
