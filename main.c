@@ -166,7 +166,7 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 
 	struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 
-	if (mg_strcmp(hm->uri, mg_str("/ws")) == 0) {
+	if (!mg_strcmp(hm->uri, mg_str("/ws"))) {
 		mg_ws_upgrade(c, hm, NULL);
 		return;
 	}
@@ -177,8 +177,8 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		if (visitor == NULL) { return; }
 	}
 
-	if (!strncmp(hm->method.buf, "POST", 4)) { // TODO: use mg_strcmp
-		if (mg_strcmp(hm->uri, mg_str("/binary")) == 0) {
+	if (!mg_strcmp(hm->method, mg_str("POST"))) {
+		if (!mg_strcmp(hm->uri, mg_str("/binary"))) {
 			BReader br = { .data=hm->body.buf, .count=hm->body.len };
 			uint16_t msg_type;
 			// TODO: fix reloading freeze
@@ -194,9 +194,9 @@ void HandleHTTPMessage(struct mg_connection* c, void* ev_data) {
 		}
 	}
 
-	if (!strncmp(hm->method.buf, "GET", 3)) {
+	if (!mg_strcmp(hm->method, mg_str("GET"))) {
 
-		if (mg_strcmp(hm->uri, mg_str("/enums.js")) == 0) {
+		if (!mg_strcmp(hm->uri, mg_str("/enums.js"))) {
 			mg_http_reply(c, 200, "", enums_js.items);
 			return;
 		}
