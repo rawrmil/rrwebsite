@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>rawr</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/res/fonts/Libertinus-Serif/import.css">
+		<link rel="stylesheet" href="/res/fonts/Noto-Sans/import.css">
+		<link rel="stylesheet" href="/styles.css">
+	</head>
+	<style>
+		/* --- WELCOME PANE --- */
+		.r_welcome_pane {
+			display: flex;
+			flex-direction: column;
+			gap: 70px;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+			min-height: 100vh;
+			background: no-repeat center/cover white;
+			box-shadow: inset 0 0 0 100vmax rgba(255,255,255,0.45);
+			padding: 64px 24px 48px 24px;
+			box-sizing: border-box; /* No shrinking */
+			overflow: hidden;
+		}
+		.r_welcome {
+			display: block;
+			color: var(--text);
+			font-size: 8vw;
+			transform: skewY(15deg);
+			animation: w-pingpong-whole 7.5s ease-in-out infinite;
+		}
+		@media (max-width: 600px) {
+			.r_welcome {
+				font-size: 18vw;
+			}
+		}
+		.r_welcome span {
+			display: inline-block;
+			font-family: LibertinusSerif;
+			animation: w-pingpong 2.5s ease-in-out infinite;
+			text-shadow: -0.07em -0.07em var(--text-muted);
+			transform: translateY(0.4em);
+			opacity: 0.5;
+		}
+		.r_welcome span:nth-child(1) { animation-delay: 0.0s; }
+		.r_welcome span:nth-child(2) { animation-delay: 0.2s; }
+		.r_welcome span:nth-child(3) { animation-delay: 0.4s; }
+		.r_welcome span:nth-child(4) { animation-delay: 0.6s; }
+		.r_welcome span:nth-child(5) { animation-delay: 0.8s; }
+		.r_welcome span:nth-child(6) { animation-delay: 1.0s; }
+		.r_welcome span:nth-child(7) { animation-delay: 1.2s; }
+		.r_welcome span:nth-child(8) { animation-delay: 1.4s; }
+		@keyframes w-pingpong {
+			0%, 100% {
+				transform: translateY(0.4em);
+				text-shadow: -0.07em -0.07em 0.0em var(--text-muted);
+				opacity: 0.5;
+			}
+			50% {
+				transform: translateY(-0.4em);
+				text-shadow: 0.07em 0.07em 0.0em var(--text-muted);
+				opacity: 1.0;
+			}
+		}
+		@keyframes w-pingpong-whole {
+			0%, 100% {
+				transform: skewY(12deg);
+			}
+			50% {
+				transform: skewY(-12deg);
+			}
+		}
+		.r_splash {
+			font-family: NotoSans;
+			font-size: 1em;
+			text-align: center;
+			color: var(--text-muted);
+		}
+		/* --- Links --- */
+		.r_content {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+		.r_links {
+			background: none;
+			box-shadow: none;
+		}
+		.r_links_list {
+			display: flex;
+			gap: 1rem;
+			justify-content: center;
+			flex-wrap: wrap;
+			padding: 0.5em;
+		}
+		.r_links_list a {
+			display: block;
+			font-family: NotoSans;
+			text-align: center;
+			color: var(--text-muted);
+			background: var(--bg);
+			box-shadow: var(--shadow-s);
+			border-radius: 3px;
+			padding: 0.2rem 0.5rem;
+			transition: var(--ease);
+			transition: 0.1s ease-in-out;
+		}
+		.r_links_list a:hover {
+			color: var(--text);
+			transform: scale(1.05) skewX(-5deg);
+			background: var(--bg-light);
+			box-shadow: var(--shadow-l);
+		}
+		.r_links_list a svg {
+			width: 1.2rem;
+			height: 1.2rem;
+			fill: currentColor;
+			vertical-align: middle;
+			padding: 0 0.2em;
+		}
+		.r_links_socials {
+			display: flex;
+			justify-content: center;
+			padding: 0.7rem 0.7rem;
+		}
+		.r_links_socials a svg {
+			display: block;
+			font-family: NotoSans;
+			text-align: center;
+			width: 2.4rem;
+			height: 2.4rem;
+			padding: 0.2rem 0.5rem;
+			color: var(--text-muted);
+			transition: var(--ease);
+			transition: 0.1s ease-in-out;
+			fill: currentColor;
+			padding: 0 0.2em;
+		}
+		.r_links_socials a:hover svg {
+			color: var(--text);
+			transform: scale(1.05) skewX(-5deg);
+		}
+		.r_links_header {
+			text-align: center;
+		}
+	</style>
+	<body>
+		<div class="r_welcome_pane">
+		</div>
+		<div class="r_content">
+			<div class="r_box r_links">
+			</div>
+		</div>
+		<footer>
+			<span class="r_footer_copyright">
+				тут чёта © 2026
+			</span>
+		</footer>
+	</body>
+	<script>
+		// ...
+	</script>
+</html>

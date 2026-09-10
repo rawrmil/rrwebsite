@@ -10,3 +10,7 @@ compile_commands.json
 web/res
 web/res/
 web/enums.js
+
+# for liza proj
+!web/liza_yacht/index.html
+res
