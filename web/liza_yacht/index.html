@@ -99,7 +99,7 @@
 			</div>
 		</div>
 		<div id="r_pane1" class="r_pane">
-			<img id="obj_big_yacht" src="res/yacht.png" style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"></img>
+			<img id="obj_big_yacht" src="res/yacht.png" style="max-width: 80%; max-height: 80%; width: auto; height: auto; object-fit: contain;"></img>
 		</div>
 		<footer>
 			<span class="r_footer_copyright">
@@ -112,7 +112,7 @@
 		var yacht_targ = -7;
 		var yacht_curr = -7;
 		function yacht_set(v) {
-			yacht_targ = Math.min(510 + v / 2, 850);
+			yacht_targ = Math.min(510 + v * 0.95, 950);
 		}
 		yacht_set(scrollY);
 		window.addEventListener("scroll", () => {
@@ -130,12 +130,11 @@
 		}
 		yacht_animate();
 		// --- YACHT BIG ---
-		const yacht_big = document.querySelector(".r_content #obj_yacht");
 		let big_targ = -100;
 		let big_curr = -100;
 		function big_set() {
-			const passed = scrollY > r_pane0.heigth;
-			big_targ = passed ? 25 : -100;
+			const passed = scrollY > r_pane0.offsetTop + r_pane0.offsetHeight - 10;
+			big_targ = passed ? 50 : -100;
 		}
 
 		window.addEventListener("scroll", big_set);
@@ -148,8 +147,7 @@
 
 			var x = big_curr;
 			var y = Math.sin(big_curr / 5.0);
-			yacht_big.style.transform =
-				`translate(calc(-50% + ${x}vw), ${y}%)`;
+			obj_big_yacht.style.transform = `translate(calc(-50% + ${x}vw), ${y}%)`;
 
 			requestAnimationFrame(big_animate);
 		}
