@@ -87,69 +87,8 @@
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
+			background: white !important;
 		}
-		.r_links {
-			background: none;
-			box-shadow: none;
-		}
-		.r_links_list {
-			display: flex;
-			gap: 1rem;
-			justify-content: center;
-			flex-wrap: wrap;
-			padding: 0.5em;
-		}
-		.r_links_list a {
-			display: block;
-			font-family: NotoSans;
-			text-align: center;
-			color: var(--text-muted);
-			background: var(--bg);
-			box-shadow: var(--shadow-s);
-			border-radius: 3px;
-			padding: 0.2rem 0.5rem;
-			transition: var(--ease);
-			transition: 0.1s ease-in-out;
-		}
-		.r_links_list a:hover {
-			color: var(--text);
-			transform: scale(1.05) skewX(-5deg);
-			background: var(--bg-light);
-			box-shadow: var(--shadow-l);
-		}
-		.r_links_list a svg {
-			width: 1.2rem;
-			height: 1.2rem;
-			fill: currentColor;
-			vertical-align: middle;
-			padding: 0 0.2em;
-		}
-		.r_links_socials {
-			display: flex;
-			justify-content: center;
-			padding: 0.7rem 0.7rem;
-		}
-		.r_links_socials a svg {
-			display: block;
-			font-family: NotoSans;
-			text-align: center;
-			width: 2.4rem;
-			height: 2.4rem;
-			padding: 0.2rem 0.5rem;
-			color: var(--text-muted);
-			transition: var(--ease);
-			transition: 0.1s ease-in-out;
-			fill: currentColor;
-			padding: 0 0.2em;
-		}
-		.r_links_socials a:hover svg {
-			color: var(--text);
-			transform: scale(1.05) skewX(-5deg);
-		}
-		.r_links_header {
-			text-align: center;
-		}
-		// --- YACHT STUFF ---
 	</style>
 	<body>
 		<div class="r_welcome_pane" style="position: relative;">
@@ -157,8 +96,7 @@
 			<img id="obj_yacht" src="res/d0.png" style="position: absolute; bottom: 25%; left: -20%; width: 15%; height: 15%;"></img>
 		</div>
 		<div class="r_content">
-			<div class="r_box r_links">
-			</div>
+			<img id="obj_yacht" src="res/yacht.png" style="width: auto; height: 100vh; object-fit: cover;"></img>
 		</div>
 		<footer>
 			<span class="r_footer_copyright">
@@ -167,6 +105,7 @@
 		</footer>
 	</body>
 	<script>
+		// --- YACHT SMALL ---
 		var yacht_targ = -7;
 		var yacht_curr = -7;
 		function yacht_set(v) {
@@ -187,5 +126,31 @@
 			requestAnimationFrame(yacht_animate);
 		}
 		yacht_animate();
+		// --- YACHT BIG ---
+		const yacht_big = document.querySelector(".r_content #obj_yacht");
+		let big_targ = -100;
+		let big_curr = -100;
+		function big_set() {
+			const passed = scrollY > innerHeight;
+			big_targ = passed ? 25 : -100;
+		}
+
+		window.addEventListener("scroll", big_set);
+		window.addEventListener("resize", big_set);
+		big_set();
+
+		function big_animate() {
+			const diff = big_targ - big_curr;
+			big_curr += diff * 0.04;
+
+			var x = big_curr;
+			var y = Math.sin(big_curr / 5.0);
+			yacht_big.style.transform =
+				`translate(calc(-50% + ${x}vw), ${y}%)`;
+
+			requestAnimationFrame(big_animate);
+		}
+
+		big_animate();
 	</script>
 </html>
